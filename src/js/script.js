@@ -61,6 +61,8 @@ function init() {
     setTimeout(_ => loading.remove(), 500);
   },1000);
   
+  document.addEventListener(e => console.log(e.type));
+
 };
 
 function paletteFunction() {
@@ -266,7 +268,6 @@ function canvasFunction() {
         img.onload = function() {
           ctx.clearRect(0, 0, $canvas.width, $canvas.height);
           ctx.drawImage(img, 0, 0, $canvas.width, $canvas.height, 0, 0, $canvas.width, $canvas.height);  
-          console.log(img);
         }
       }
     }
@@ -333,7 +334,11 @@ function canvasFunction() {
           for(let i = 0; i < drawingLine.length; i++) {
             const moveX = drawingLine[i].x;
             const moveY = drawingLine[i].y;
-            ctx.lineTo(moveX, moveY);
+            if(i === 0) {
+              ctx.moveTo(moveX, moveY);
+            }else{
+              ctx.lineTo(moveX, moveY);
+            }
           }
         }
         ctx.lineTo(mouseX, mouseY);
@@ -393,26 +398,14 @@ function hasClass(element, className) {
 function setHex(hex) {
   hex = hex.replace(/#/gi, "");
   let hexCode = hex = hex.split("");
-  if(hexCode.length === 6) {
-    return `#${hex}`;
-  }
-  if(hexCode.length === 5) {
-    return `#${hexCode[0]}${hexCode[1]}${hexCode[2]}${hexCode[3]}${hexCode[4]}${hexCode[4]}`;
-  }
-  if(hexCode.length === 4) {
-    return `#${hexCode[0]}${hexCode[1]}${hexCode[2]}${hexCode[2]}${hexCode[3]}${hexCode[3]}`;
-  }
-  if(hexCode.length === 3) {
-    return `#${hexCode[0]}${hexCode[0]}${hexCode[1]}${hexCode[1]}${hexCode[2]}${hexCode[2]}`;
-  }
-  if(hexCode.length === 2) {
-    return `#${hexCode[0]}${hexCode[0]}${hexCode[1]}${hexCode[1]}${hexCode[1]}${hexCode[1]}`;
-  }
-  if(hexCode.length === 1) {
-    return `#${hexCode[0]}${hexCode[0]}${hexCode[0]}${hexCode[0]}${hexCode[0]}${hexCode[0]}`;
-  }
-  if(hexCode.length === 0) {
-    return `#000000`;
+  switch(hexCode.length) {
+    case 6 : return `#${hex}`;
+    case 5 : return `#${hexCode[0]}${hexCode[1]}${hexCode[2]}${hexCode[3]}${hexCode[4]}${hexCode[4]}`;
+    case 4 : return `#${hexCode[0]}${hexCode[1]}${hexCode[2]}${hexCode[2]}${hexCode[3]}${hexCode[3]}`;
+    case 3 : return `#${hexCode[0]}${hexCode[0]}${hexCode[1]}${hexCode[1]}${hexCode[2]}${hexCode[2]}`;
+    case 2 : return `#${hexCode[0]}${hexCode[0]}${hexCode[1]}${hexCode[1]}${hexCode[1]}${hexCode[1]}`;
+    case 1 : return `#${hexCode[0]}${hexCode[0]}${hexCode[0]}${hexCode[0]}${hexCode[0]}${hexCode[0]}`;
+    case 0 : return `#000000`;
   }
 };
 
