@@ -1,3 +1,4 @@
+const $page = document.getElementById("page");
 const $paletteHistory = document.getElementById("paletteHistory");
 const $palette = document.getElementById("palette");
 const $color = document.getElementById("color");
@@ -5,6 +6,9 @@ const $colorInput = document.getElementById("colorInput");
 const $colorIcon = document.getElementById("colorIcon");
 const $canvas = document.getElementById("canvas");
 const $canvasPage = document.getElementById("canvasPage");
+const $colorBar = document.getElementById("colorBar");
+const $toolBar = document.getElementById("toolBar");
+const $undo = document.getElementById("undo");
 const ctx = $canvas.getContext("2d");
 const hex = "0123456789abcdef".split("");
 let $colors;
@@ -25,18 +29,27 @@ let oldX = 0;
 let y = 0;
 let oldY = 0;
 let mouseDown = false;
+let dragX = false;
+let dragY = false;
+let pageX = 0;
+let pageY = 0;
 let drawing = false;
 let drawingSize = 10;
 let drawingStyle = "line";
 let strokeStyle = "";
 let drawingBlur = 0;
 let drawingLine = new Array();
+let drawingHistory = new Array();
 
 function init() {
   const loading = document.getElementById("loadingPage");
 
   $canvas.width = (window.innerWidth / 10) * 8;
   $canvas.height = (window.innerHeight / 10) * 8;
+
+  $canvas.style.width = `${$canvas.width}px`;
+  $canvas.style.height = `${$canvas.height}px`;
+
   ctx.fillStyle = "#fff";
   ctx.fillRect(0, 0, $canvas.width, $canvas.height);
   
@@ -132,18 +145,53 @@ function paletteFunction() {
     if(mouseDown && palette) {
       x = e.pageX;
       y = e.pageY;
-      if(oldY - y > 0) {
+      if(!dragX && !dragY) {
+        if(oldY - y > 10 || oldY - y < -10) {
+          dragY = true;
+          return;
+        }
+        if(x - oldX > 10) {
+          dragX = true;
+        }
+      }
+      if(dragX) {
+        let bottom = -800 - x + oldX; 
+        if(bottom > -800) bottom = -800;
+        $palette.style.bottom = `${bottom}px`;
+      }
+      if(dragY) {
         movePaletteDeg += (y - oldY) / 10;
         oldY = y;
-      }else if(y - oldY > 0) {
-        movePaletteDeg += (y - oldY) / 10;
-        oldY = y;
-      };
+      }
     };
   });
 
   document.addEventListener("mouseup", e => {
     mouseDown = false;
+    if(dragX === true){
+      let bottom = Number($palette.style.bottom.replace(/px/gi, ""));
+      if(bottom < -1300) {
+        $palette.style.bottom = "-1600px";
+        $palette.style.transition = ".5s";
+        palette = 0;
+        setTimeout(_ => {
+          $canvasPage.style.zIndex = "";
+          $palette.style.transition = "";
+          palette = false;
+        }, 500);
+      }else {
+        $palette.style.bottom = "-800px";
+        $palette.style.transition = ".5s";
+        $canvasPage.style.zIndex = "0";
+        palette = 0;
+        setTimeout(_ => {
+          palette = true;
+          $palette.style.transition = "";
+        }, 500);
+      };
+      dragX = false;
+    }
+    dragY = false;
   });
 
   setInterval(e => {
@@ -210,10 +258,29 @@ function addPaletteHistory() {
 };
 
 function canvasFunction() {
+  document.addEventListener("click", e => {
+    if(e.target === $undo) {
+      if(drawingHistory.length > 0) {
+        let img = document.createElement("img");
+        img.setAttribute("src", drawingHistory[drawingHistory.length - 1]);
+        img.onload = function() {
+          ctx.clearRect(0, 0, $canvas.width, $canvas.height);
+          ctx.drawImage(img, 0, 0, $canvas.width, $canvas.height, 0, 0, $canvas.width, $canvas.height);  
+          console.log(img);
+        }
+      }
+    }
+  })
+
   document.addEventListener("mousedown", e => {
     if(e.target === $canvas) {
       addPaletteHistory();
+      drawingHistory.push(canvas.toDataURL());
       drawing = true;
+      pageX = e.pageX - e.offsetX;
+      pageY = e.pageY - e.offsetY;
+      $toolBar.style.pointerEvents = "none";
+      $colorBar.style.pointerEvents = "none";
       ctx.fillStyle = $color.value;
       ctx.strokeStyle = $color.value;
       ctx.lineWidth = drawingSize;
@@ -238,11 +305,17 @@ function canvasFunction() {
   });
 
   document.addEventListener("mousemove", e => {
-    if(drawing && e.target === $canvas) {
-      if(drawingStyle === "pixel") ctx.fillRect(e.offsetX - (drawingSize / 2), e.offsetY - (drawingSize / 2), drawingSize, drawingSize);
+    if(drawing && (e.target === $canvas || e.target === $page)) {
+      let mouseX = e.offsetX;
+      let mouseY = e.offsetY;
+      if(e.target === $page) {
+        mouseX -= pageX;
+        mouseY -= pageY;
+      }
+      if(drawingStyle === "pixel") ctx.fillRect(mouseX - (drawingSize / 2), mouseY - (drawingSize / 2), drawingSize, drawingSize);
       if(drawingStyle === "circle") {
         ctx.beginPath();
-        ctx.arc(e.offsetX, e.offsetY, drawingSize / 2, 0, Math.PI * 2, false);
+        ctx.arc(mouseX, mouseY, drawingSize / 2, 0, Math.PI * 2, false);
         ctx.fill();
       };
       if(drawingStyle === "line") {
@@ -263,8 +336,8 @@ function canvasFunction() {
             ctx.lineTo(moveX, moveY);
           }
         }
-        ctx.lineTo(e.offsetX, e.offsetY);
-        drawingLine.push({x: e.offsetX, y: e.offsetY});
+        ctx.lineTo(mouseX, mouseY);
+        drawingLine.push({x: mouseX, y: mouseY});
         ctx.stroke();
       };
     };
@@ -272,6 +345,8 @@ function canvasFunction() {
 
   document.addEventListener("mouseup", e => {
     if(drawing === true) {
+      $toolBar.style.pointerEvents = "";
+      $colorBar.style.pointerEvents = "";
       if(drawing && e.target === $canvas && drawingStyle === "line" && strokeStyle === "round") {
         ctx.beginPath();
         ctx.arc(e.offsetX, e.offsetY, drawingSize / 2, 0, Math.PI * 2, false);
