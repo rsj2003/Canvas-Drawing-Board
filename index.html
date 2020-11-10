@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Drawing Board</title>
+  <link rel="stylesheet" href="./src/css/style.css">
+</head>
+<body>
+  <div id="loadingPage">
+    <div class="loadingCircleX loadingCircle"></div>
+    <div class="loadingCircleL loadingCircle"></div>
+    <div class="loadingCircleM loadingCircle"></div>
+    <div class="loadingCircleS loadingCircle"></div>
+    <p class="loadingText">loading<span>.</span><span>.</span><span>.</span></p>
+  </div>
+  <div id="page">
+    <div id="canvasPage">
+      <canvas id="canvas"></canvas>
+    </div>
+    <div id="colorBar">
+      <div id="controller" class="tollBars toggle">
+        <div id="colorIcon">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <input type="color" id="color" value="#ff0000">
+        <input type="text" id="colorInput" value="#ff0000">
+        <div id="paletteHistory"></div>
+      </div>
+      <div id="colorRoller">
+        <div id="palette"></div>
+      </div>
+    </div>
+    <div id="toolBar" class="tollBars toggle">
+      <canvas id="preview"></canvas>
+
+    </div>
+  </div>
+  <script src="./src/js/script.js"></script>
+</body>
+</html>
