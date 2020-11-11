@@ -12,15 +12,11 @@
   .loadingText>span:nth-of-type(2){animation-name: dot2;}
   .loadingText>span:nth-of-type(3){animation-name: dot3;}
 
-  .loadingCircleX{width: 100px; height: 50px; transform: translate(-50%, -100%) rotate(-90deg); animation-name: CircleX; animation-duration: 8s;}
-  .loadingCircleL{width: 80px; height: 40px; transform: translate(-50%, -100%) rotate(90deg); animation-name: CircleL; animation-duration: 4s;}
-  .loadingCircleM{width: 60px; height: 30px; transform: translate(-50%, -100%) rotate(180deg); animation-name: CircleM; animation-duration: 2s;}
+  .loadingCircleL{width: 60px; height: 30px; transform: translate(-50%, -100%) rotate(180deg); animation-name: CircleL; animation-duration: 2s;}
   .loadingCircleS{width: 40px; height: 20px; transform: translate(-50%, -100%) rotate(0); animation-name: CircleS; animation-duration: 1s;}
 
   .loadingCircle::before{border-radius: 50%;}
-  .loadingCircleX::before{content: ""; display: block; width: 100px; height: 100px; background: #fff;}
-  .loadingCircleL::before{content: ""; display: block; width: 80px; height: 80px; background: #aaa;}
-  .loadingCircleM::before{content: ""; display: block; width: 60px; height: 60px; background: #fff;}
+  .loadingCircleL::before{content: ""; display: block; width: 60px; height: 60px; background: #fff;}
   .loadingCircleS::before{content: ""; display: block; width: 40px; height: 40px; background: #777;}
 
   
@@ -28,14 +24,21 @@
   #page{position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: #222; overflow:hidden;}
   
   #colorBar{position: absolute; width: 100%; height: 100%; right: 0; top: 0;}  
+  .toolBarWarp{width: 100%; height: 100%; position: absolute; overflow-y: auto;}
+  .toolBarWarp::-webkit-scrollbar{display: none;}
+  .toolBarToggleButton{width: 30px; height: 30px; position: absolute; background: #666; color: #fff; text-align: center; line-height: 26px; font-size: 30px; border: 2px solid #444; top: 0; cursor:pointer;}
+  .toolBarActive{display:none;}
+  .toolBars.toggle .toolBarActive{display:block;}
+  .toolBars.toggle .toolBarInactive{display:none;}
 
-  #controller{width: 200px; height: 700px; position: absolute; right: -210px; top: 50%; transform: translateY(-50%);background: #777; z-index: 200; border-radius: 2px; border: 2px solid #555;}
-    #controller.toggle{right: 15px;}
+  #controller{width: 200px; height: 55%; position: absolute; right: -200px; top: 50%; transform: translateY(-50%);background: #777; z-index: 200; border-radius: 2px; border: 2px solid #555; border-right: 0; transition: 0.5s;}
+    #controller.toggle{right: 0;}
+    #controller>.toolBarToggleButton{left: -34px; border-right: none; border-radius: 5px 0 0 5px;}
     #color{width: 120px; height: 120px; float: right; margin: 39px 39px 19px;}
     #colorInput{width: 112px; margin: 0 39px 19px; border-width: 1px; padding: 3px 4px; font-size: 18px;}
     #paletteHistory{width: 120px; height: 360px; background: #ddd; margin: 0 40px 0;}
     .colorHistory{width: 22px; height: 22px; border: 1px solid #fff; float: left; box-shadow: inset 0 0 0 1px #bbb; cursor: pointer;}
-    #colorIcon{width: 80px; height: 80px; position: absolute; right: 10px; bottom: 10px; cursor: pointer;}
+    #colorIcon{width: 80px; height: 80px; position: relative; cursor: pointer; margin: 20px; float: right;}
       #colorIcon>span{width: 10px; height: 20px; display: block; position: absolute; transform: translateX(-50%); transform-origin: 0 35px; left: 50%; top: 6px; pointer-events: none;}
       #colorIcon>span:nth-of-type(1){background: #f00;}
       #colorIcon>span:nth-of-type(2){background: #ff0; transform: rotate(60deg) translateX(-50%);}
@@ -49,22 +52,24 @@
     .box{width: 250px; height: 400px; float: left; position: absolute; transform-origin: 0 1500px; transform: translateX(-50%); left: 50%; bottom: 1100px; border-radius: 8px; padding: 340px 20px 0; box-sizing: border-box;user-select: none; transition: .5s; cursor: pointer;}
     .box>span{ text-shadow: 0 0 5px #000; color: #fff; text-align: left; font-size: 30px; transform: rotate(90deg); display: block; position: absolute; left: 5px; bottom: 30px;}  
 
-  #canvasPage{width: 100%; height: 100%; position: absolute; max-width: 80%; max-height: 80%; overflow: auto; z-index: 200; left: 50%; top: 50%; transform: translate(-50%, -50%); border: 2px solid #777;}
-  #canvas{position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);}
+  #canvasPage{width: 100%; height: 100%; position: absolute; max-width: 85%; max-height: 85%; overflow: auto; z-index: 200; left: 50%; top: 50%; transform: translate(-50%, -50%); border: 2px solid #777;}
+  #canvas.center{position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);}
 
-  #toolBar{width: 200px; height: 700px; position: absolute; left: -210px; top: 50%; transform: translateY(-50%);background: #777; z-index: 200; border-radius: 2px; border: 2px solid #555;}
-    #toolBar.toggle{left: 15px;}
+  #toolBar{width: 200px; height: 55%; position: absolute; left: -200px; top: 50%; transform: translateY(-50%);background: #777; z-index: 200; border-radius: 2px; border: 2px solid #555; border-left: 0; transition: 0.5s;}
+    #toolBar.toggle{left: 0;}
+    #toolBar>.toolBarToggleButton{right: -34px; border-left: none; border-radius: 0 5px 5px 0;}
+    .toolBarButtonList{width: 120px; margin: 25px 40px; display: flex; justify-content: space-between; flex-wrap: wrap;}
+    #preview{width: 120px; height: 120px; margin: 38px 38px 8px; border: 2px solid #aaa;}
+    .toolBarButton{width: 55px; height: 40px; cursor: default; background: #888; border: 2px solid #aaa; user-select: none;}
+    button~button~.toolBarButton{margin-top: 10px;}
+    .toolBarButton:focus{outline: 0;}
+    .toolBarButton.active{cursor: pointer; background: #ccc; border: 2px solid #bbb;}
+    .toolBarButton.active:hover{background: #bbb;}
+    .toolBarButton.select{background: #fff;}
+    .toolBarButton.select:hover{background: #fff;}
 
 /* loading page animation */
-@keyframes CircleX{
-  0%{transform: translate(-50%, -100%) rotate(-90deg);}
-  100%{transform: translate(-50%, -100%) rotate(270deg);}
-}
 @keyframes CircleL{
-  0%{transform: translate(-50%, -100%) rotate(90deg);}
-  100%{transform: translate(-50%, -100%) rotate(-270deg);}
-}
-@keyframes CircleM{
   0%{transform: translate(-50%, -100%) rotate(180deg);}
   100%{transform: translate(-50%, -100%) rotate(540deg);}
 }

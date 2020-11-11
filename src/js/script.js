@@ -1,18 +1,33 @@
 const $page = document.getElementById("page");
-const $paletteHistory = document.getElementById("paletteHistory");
-const $palette = document.getElementById("palette");
-const $color = document.getElementById("color");
-const $colorInput = document.getElementById("colorInput");
-const $colorIcon = document.getElementById("colorIcon");
+let x = 0;
+let oldX = 0;
+let y = 0;
+let oldY = 0;
+let mouseDown = false;
+let dragX = false;
+let dragY = false;
+let pageX = 0;
+let pageY = 0;
+// canvas
 const $canvas = document.getElementById("canvas");
 const $canvasPage = document.getElementById("canvasPage");
-const $colorBar = document.getElementById("colorBar");
-const $toolBar = document.getElementById("toolBar");
 const $undo = document.getElementById("undo");
+const $redo = document.getElementById("redo");
 const ctx = $canvas.getContext("2d");
+let drawing = false;
+let drawingSize = 5;
+let drawingStyle = "line";
+let strokeStyle = "";
+let drawingBlur = 0;
+let drawingLine = new Array();
+let drawingUndoList = new Array();
+let drawingRedoList = new Array();
+let loadDrawing = document.createElement("img");
+// roller palette
+const $paletteHistory = document.getElementById("paletteHistory");
+const $palette = document.getElementById("palette");
 const hex = "0123456789abcdef".split("");
 let $colors;
-let $colorHistory;
 let colorNumber = [15,0,6];
 let order = [0,1,2];
 let color = "#f06";
@@ -23,46 +38,43 @@ let select = 0;
 let oldSelect = 0;
 let paletteDeg = 0;
 let movePaletteDeg = 0;
+// color tool bar
+const $color = document.getElementById("color");
+const $colorInput = document.getElementById("colorInput");
+const $colorIcon = document.getElementById("colorIcon");
+const $controller = document.getElementById("controller");
+const $colorBar = document.getElementById("colorBar");
+const $toolBar = document.getElementById("toolBar");
+let $colorHistory;
 let paletteHistory = new Array();
-let x = 0;
-let oldX = 0;
-let y = 0;
-let oldY = 0;
-let mouseDown = false;
-let dragX = false;
-let dragY = false;
-let pageX = 0;
-let pageY = 0;
-let drawing = false;
-let drawingSize = 10;
-let drawingStyle = "line";
-let strokeStyle = "";
-let drawingBlur = 0;
-let drawingLine = new Array();
-let drawingHistory = new Array();
+// brush tool bar
+const $preview = document.getElementById("preview");
+const previewCtx = $preview.getContext("2d");
+const $toolBarToggleButton = document.querySelectorAll(".toolBarToggleButton");
+const $brushButton = document.getElementById("brushButton");
 
 function init() {
   const loading = document.getElementById("loadingPage");
 
-  $canvas.width = (window.innerWidth / 10) * 8;
-  $canvas.height = (window.innerHeight / 10) * 8;
+  paletteFunction();
+  canvasFunction();
+  brushPreview();
+  
+
+  $canvas.width = 1200;
+  $canvas.height = 600;
 
   $canvas.style.width = `${$canvas.width}px`;
   $canvas.style.height = `${$canvas.height}px`;
 
   ctx.fillStyle = "#fff";
   ctx.fillRect(0, 0, $canvas.width, $canvas.height);
-  
-  paletteFunction();
-  canvasFunction();
+
   
   setTimeout(_ => {
     loading.style.opacity = 0;
     setTimeout(_ => loading.remove(), 500);
-  },1000);
-  
-  document.addEventListener(e => console.log(e.type));
-
+  },1000);  
 };
 
 function paletteFunction() {
@@ -96,6 +108,20 @@ function paletteFunction() {
       if(e.wheelDelta < 0) movePaletteDeg += 15;
     };
   });
+
+  document.addEventListener("input", e => {
+    if(e.target === $color) {
+      $colorInput.value = $color.value;
+    }
+    if(e.target === $colorInput) {
+      $color.value = setHex($colorInput.value);
+    }
+    canvasLoad();
+  })
+
+  $colorInput.addEventListener("blur", e => {
+    $colorInput.value = setHex($colorInput.value);
+  })
 
   document.addEventListener("click", e => {
     if(hasClass(e.target, "box") && palette) {
@@ -260,28 +286,59 @@ function addPaletteHistory() {
 };
 
 function canvasFunction() {
+  let reSize = Math.ceil(getComputedStyle($toolBar).getPropertyValue("width").replace(/px/gi, "") / window.innerWidth * 100) * 2;
+  $canvasPage.style.width = `${90 - reSize}%`;
+  $canvasPage.style.height = `${90 - reSize}%`;
+
   document.addEventListener("click", e => {
     if(e.target === $undo) {
-      if(drawingHistory.length > 0) {
-        let img = document.createElement("img");
-        img.setAttribute("src", drawingHistory[drawingHistory.length - 1]);
-        img.onload = function() {
+      if(drawingUndoList.length > 0) {
+        drawingRedoList.push(canvas.toDataURL());
+        $redo.classList.add("active");
+        loadDrawing.setAttribute("src", drawingUndoList[drawingUndoList.length - 1]);
+        loadDrawing.onload = function() {
+          ctx.filter = `blur(0px)`;
           ctx.clearRect(0, 0, $canvas.width, $canvas.height);
-          ctx.drawImage(img, 0, 0, $canvas.width, $canvas.height, 0, 0, $canvas.width, $canvas.height);  
+          ctx.drawImage(loadDrawing, 0, 0, $canvas.width, $canvas.height, 0, 0, $canvas.width, $canvas.height);  
         }
+        drawingUndoList.splice(-1,1);
       }
+      if(drawingUndoList.length <= 0) $undo.classList.remove("active");
+    }
+    if(e.target === $redo) {
+      if(drawingRedoList.length > 0) {
+        drawingUndoList.push(canvas.toDataURL());
+        $undo.classList.add("active");
+        loadDrawing.setAttribute("src", drawingRedoList[drawingRedoList.length - 1]);
+        loadDrawing.onload = function() {
+          ctx.filter = `blur(0px)`;
+          ctx.clearRect(0, 0, $canvas.width, $canvas.height);
+          ctx.drawImage(loadDrawing, 0, 0, $canvas.width, $canvas.height, 0, 0, $canvas.width, $canvas.height);
+        }
+        drawingRedoList.splice(-1,1);
+      }
+      if(drawingRedoList.length <= 0) $redo.classList.remove("active");
+    }
+  });
+
+  document.addEventListener("mousewheel", e => {
+    if(drawing === true) {
+      canvasMouseUp(e);
     }
   })
 
   document.addEventListener("mousedown", e => {
     if(e.target === $canvas) {
       addPaletteHistory();
-      drawingHistory.push(canvas.toDataURL());
+      drawingUndoList.push(canvas.toDataURL());
+      drawingRedoList = [];
+      $redo.classList.remove("active");
       drawing = true;
       pageX = e.pageX - e.offsetX;
       pageY = e.pageY - e.offsetY;
       $toolBar.style.pointerEvents = "none";
       $colorBar.style.pointerEvents = "none";
+      $canvasPage.style.pointerEvents = "none";
       ctx.fillStyle = $color.value;
       ctx.strokeStyle = $color.value;
       ctx.lineWidth = drawingSize;
@@ -297,6 +354,7 @@ function canvasFunction() {
           ctx.fill();
           ctx.beginPath();
         };
+        loadDrawing.setAttribute("src", drawingUndoList[drawingUndoList.length - 1]);
         drawingLine = [{x: e.offsetX, y: e.offsetY}];
         ctx.moveTo(e.offsetX, e.offsetY);
         ctx.lineTo(e.offsetX, e.offsetY);
@@ -320,29 +378,24 @@ function canvasFunction() {
         ctx.fill();
       };
       if(drawingStyle === "line") {
-        if(drawingLine.length > 3) {
+        ctx.filter = `blur(0px)`;
+        ctx.clearRect(0, 0, $canvas.width, $canvas.height);
+        ctx.drawImage(loadDrawing, 0, 0, $canvas.width, $canvas.height, 0, 0, $canvas.width, $canvas.height);  
+        ctx.filter = `blur(${drawingBlur}px)`;
+        if(strokeStyle === "round") {
           ctx.beginPath();
-          const moveX = drawingLine[drawingLine.length - 3].x;
-          const moveY = drawingLine[drawingLine.length - 3].y;
-          ctx.moveTo(moveX, moveY);
-          for(let i = drawingLine.length - 2; i < drawingLine.length; i++) {
-            const moveX = drawingLine[i].x;
-            const moveY = drawingLine[i].y;
-            ctx.lineTo(moveX, moveY);
-          }
-        }else {
-          for(let i = 0; i < drawingLine.length; i++) {
-            const moveX = drawingLine[i].x;
-            const moveY = drawingLine[i].y;
-            if(i === 0) {
-              ctx.moveTo(moveX, moveY);
-            }else{
-              ctx.lineTo(moveX, moveY);
-            }
-          }
+          ctx.arc(drawingLine[0].x, drawingLine[0].y, drawingSize / 2, 0, Math.PI * 2, false);
+          ctx.fill();
         }
-        ctx.lineTo(mouseX, mouseY);
+        ctx.beginPath();
         drawingLine.push({x: mouseX, y: mouseY});
+        drawingLine.forEach((i, l) => {
+          if(l === 0) {
+            ctx.moveTo(i.x, i.y);
+            return;
+          }
+          ctx.lineTo(i.x, i.y);
+        })
         ctx.stroke();
       };
     };
@@ -350,17 +403,122 @@ function canvasFunction() {
 
   document.addEventListener("mouseup", e => {
     if(drawing === true) {
+      canvasMouseUp(e);
+    }
+  });
+
+  function canvasMouseUp(e) {
+    let img = document.createElement("img");
+    let mouseX = e.offsetX;
+    let mouseY = e.offsetY;
+    if(e.target === $page) {
+      mouseX -= pageX;
+      mouseY -= pageY;
+    }
+    img.setAttribute("src", drawingUndoList[drawingUndoList.length - 1]);
+    img.onload = function() {
+      if(drawingStyle === "line"){
+        ctx.filter = `blur(0px)`;
+        ctx.clearRect(0, 0, $canvas.width, $canvas.height);
+        ctx.drawImage(img, 0, 0, $canvas.width, $canvas.height, 0, 0, $canvas.width, $canvas.height);
+        ctx.filter = `blur(${drawingBlur}px)`;
+        for(let i = 0; i < drawingLine.length; i++) {
+          const moveX = drawingLine[i].x;
+          const moveY = drawingLine[i].y;
+          if(i === 0) {
+            ctx.moveTo(moveX, moveY);
+          }else{
+            ctx.lineTo(moveX, moveY);
+          }
+        }
+        ctx.stroke();
+      }
       $toolBar.style.pointerEvents = "";
       $colorBar.style.pointerEvents = "";
-      if(drawing && e.target === $canvas && drawingStyle === "line" && strokeStyle === "round") {
+      if(drawingStyle === "line" && strokeStyle === "round") {
         ctx.beginPath();
-        ctx.arc(e.offsetX, e.offsetY, drawingSize / 2, 0, Math.PI * 2, false);
+        ctx.arc(drawingLine[0].x, drawingLine[0].y, drawingSize / 2, 0, Math.PI * 2, false);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(mouseX, mouseY, drawingSize / 2, 0, Math.PI * 2, false);
         ctx.fill();
       }
+      $canvasPage.style.pointerEvents = "";
+      $undo.classList.add("active");
       drawing = false;
       ctx.beginPath();
     }
-  });
+  }
+
+  setInterval(e => {
+    let maxWidth = $canvasPage.style.width.replace(/%/gi, "") * window.innerWidth / 100;
+    let maxHeight = $canvasPage.style.height.replace(/%/gi, "") * window.innerHeight / 100;
+    if(maxWidth < $canvas.width && maxHeight < $canvas.height) {
+      $canvas.classList.remove("center");
+      return;
+    }
+    $canvas.classList.add("center");
+  })
+}
+
+function brushPreview() {
+  $preview.width = 120;
+  $preview.height = 120;
+
+  previewCtx.fillStyle = "#fff";
+  previewCtx.fillRect(0, 0, $preview.width, $preview.height);
+
+  canvasLoad();
+
+  $toolBarToggleButton.forEach(i => i.addEventListener("click", e => {
+    e.target.closest(".toolBars").classList.toggle("toggle");
+  }));
+
+  $brushButton.querySelectorAll("button").forEach(i => i.addEventListener("click", e => {
+    if(e.target.id === "roundLine") {
+      drawingStyle = "line";
+      strokeStyle = "round";
+    }else {
+      strokeStyle = "";
+      drawingStyle = e.target.id;
+    }
+    $brushButton.querySelector(".select").classList.remove("select");
+    e.target.classList.add("select");
+    canvasLoad();
+  }))
+}
+
+function canvasLoad() {
+  previewCtx.beginPath();
+  previewCtx.fillStyle = "#fff";
+  previewCtx.fillRect(0, 0, $preview.width, $preview.height);
+  previewCtx.fillStyle = $color.value;
+  previewCtx.strokeStyle = $color.value;
+  previewCtx.lineWidth = drawingSize;
+  previewCtx.filter = `blur(${drawingBlur}px)`;
+  let pixelSize = drawingSize;
+
+  if(previewCtx.lineWidth > 30) previewCtx.lineWidth = 30;
+  if(pixelSize > 60) pixelSize = 60;
+
+  if(drawingStyle === "pixel") previewCtx.fillRect($preview.width / 2 - (pixelSize / 2), $preview.height / 2 - (pixelSize / 2), pixelSize, pixelSize);
+  if(drawingStyle === "circle") {
+    previewCtx.arc($preview.width / 2, $preview.height / 2, pixelSize / 2, 0, Math.PI * 2, false);
+    previewCtx.fill();
+  };
+  if(drawingStyle === "line") {
+    if(strokeStyle === "round") {
+      previewCtx.arc($preview.width / 2, $preview.height / 2 - 40, previewCtx.lineWidth / 2, 0, Math.PI * 2, false);
+      previewCtx.fill();
+      previewCtx.beginPath();
+      previewCtx.arc($preview.width / 2, $preview.height / 2 + 40, previewCtx.lineWidth / 2, 0, Math.PI * 2, false);
+      previewCtx.fill();
+      previewCtx.beginPath();
+    };
+    previewCtx.moveTo($preview.width / 2, $preview.height / 2 - 40);
+    previewCtx.lineTo($preview.width / 2, $preview.height / 2 + 40);
+    previewCtx.stroke();
+  };
 }
 
 function nextHex() {
