@@ -57,6 +57,12 @@ const $brushSize = document.getElementById("brushSize");
 const $brushBlurRange = document.getElementById("brushBlurRange");
 const $brushBlur = document.getElementById("brushBlur");
 const $rangeInputs = document.querySelectorAll(".rangeInputWarp input");
+let imageData;
+let pageIdx;
+let pageAroundIdx;
+let floodStartColor = new Object();
+let floodList = new Array();
+let styleColor;
 
 function init() {
   const loading = document.getElementById("loadingPage");
@@ -136,7 +142,7 @@ function paletteFunction() {
       movePaletteDeg = (select - 6) * 15;
     };
     if(hasClass(e.target, "colorHistory")) {
-      if(paletteHistory[getIdx(e.target)].length !== 0) {
+      if(paletteHistory.length >= getIdx(e.target) - 1) {
         $color.value = paletteHistory[getIdx(e.target)];
         $colorInput.value = paletteHistory[getIdx(e.target)];
       };
@@ -283,13 +289,13 @@ function paletteFunction() {
 
 function addPaletteHistory() {
   if(paletteHistory.indexOf($color.value) > -1) paletteHistory.splice(paletteHistory.indexOf($color.value), 1);
-  if(paletteHistory.length > 74) paletteHistory.splice(-1, 1);
+  if(paletteHistory.length > 74) paletteHistory.pop();
     paletteHistory.unshift($color.value);
     paletteHistory.forEach((c, i) => {
     $colorHistory[i].style.background = c;
   });
 };
-
+// canvas drawing
 function canvasFunction() {
   let reSize = Math.ceil(getComputedStyle($toolBar).getPropertyValue("width").replace(/px/gi, "") / window.innerWidth * 100) * 2;
   $canvasPage.style.width = `${90 - reSize}%`;
@@ -306,7 +312,7 @@ function canvasFunction() {
           ctx.clearRect(0, 0, $canvas.width, $canvas.height);
           ctx.drawImage(loadDrawing, 0, 0, $canvas.width, $canvas.height, 0, 0, $canvas.width, $canvas.height);  
         }
-        drawingUndoList.splice(-1,1);
+        drawingUndoList.pop();
       }
       if(drawingUndoList.length <= 0) $undo.classList.remove("active");
     }
@@ -320,9 +326,33 @@ function canvasFunction() {
           ctx.clearRect(0, 0, $canvas.width, $canvas.height);
           ctx.drawImage(loadDrawing, 0, 0, $canvas.width, $canvas.height, 0, 0, $canvas.width, $canvas.height);
         }
-        drawingRedoList.splice(-1,1);
+        drawingRedoList.pop();
       }
       if(drawingRedoList.length <= 0) $redo.classList.remove("active");
+    }
+    if(e.target === $canvas && drawingStyle === "floodFill") {
+      addPaletteHistory();
+      drawingUndoList.push(canvas.toDataURL());
+      drawingRedoList = [];
+      $redo.classList.remove("active");
+      $undo.classList.add("active");
+      styleColor = $color.value.replace(/#/gi, "").split("");
+      styleColor = [(styleColor[0] + styleColor[1]), (styleColor[2] + styleColor[3]), (styleColor[4] + styleColor[5])];
+      styleColor = [parseInt(styleColor[0], 16), parseInt(styleColor[1], 16), parseInt(styleColor[2], 16)];
+      pageX = e.offsetX;
+      pageY = e.offsetY;
+      floodList = new Array();
+      pageIdx = ((pageY * $canvas.width) + pageX) * 4;
+      let data = ctx.getImageData(0, 0, $canvas.width, $canvas.height);
+      imageData = data.data;
+      floodStartColor = {r: imageData[pageIdx], g: imageData[pageIdx + 1], b: imageData[pageIdx + 2], a: imageData[pageIdx + 3]};
+      if(styleColor[0] !== floodStartColor.r || styleColor[1] !== floodStartColor.g || styleColor[2] !== floodStartColor.b || floodStartColor.a !== floodStartColor.a){
+        setFloodLeft(pageIdx / 4);
+        setFloodRight(pageIdx / 4);
+        setFloodTop(pageIdx / 4);
+        setFloodBottom(pageIdx / 4);
+        ctx.putImageData(data, 0, 0);
+      }
     }
   });
 
@@ -333,7 +363,7 @@ function canvasFunction() {
   })
 
   document.addEventListener("mousedown", e => {
-    if(e.target === $canvas) {
+    if(e.target === $canvas && drawingStyle !== "floodFill") {
       addPaletteHistory();
       drawingUndoList.push(canvas.toDataURL());
       drawingRedoList = [];
@@ -369,7 +399,7 @@ function canvasFunction() {
   });
 
   document.addEventListener("mousemove", e => {
-    if(drawing && (e.target === $canvas || e.target === $page)) {
+    if(drawing && e.target === $page) {
       let mouseX = e.offsetX;
       let mouseY = e.offsetY;
       if(e.target === $page) {
@@ -414,12 +444,8 @@ function canvasFunction() {
 
   function canvasMouseUp(e) {
     let img = document.createElement("img");
-    let mouseX = e.offsetX;
-    let mouseY = e.offsetY;
-    if(e.target === $page) {
-      mouseX -= pageX;
-      mouseY -= pageY;
-    }
+    let mouseX = e.offsetX - pageX;
+    let mouseY = e.offsetY - pageY;
     img.setAttribute("src", drawingUndoList[drawingUndoList.length - 1]);
     img.onload = function() {
       if(drawingStyle === "line"){
@@ -464,6 +490,91 @@ function canvasFunction() {
     }
     $canvas.classList.add("center");
   })
+}
+
+function setFloodLeft(idx) {
+  imageData[idx * 4] = styleColor[0];
+  imageData[(idx * 4) + 1] = styleColor[1];
+  imageData[(idx * 4) + 2] = styleColor[2];
+  imageData[(idx * 4) + 3] = floodStartColor.a;
+  if((idx - 1) % $canvas.width !== $canvas.width - 1) {
+    if(imageData[((idx - 1) * 4)] === floodStartColor.r && imageData[((idx - 1) * 4) + 1] === floodStartColor.g && imageData[((idx - 1) * 4) + 2] === floodStartColor.b && imageData[((idx - 1) * 4) + 3] === floodStartColor.a) {
+      setFloodLeft((idx - 1));
+    }
+  }
+  if((idx - $canvas.width) > -1) {
+    if(imageData[((idx - $canvas.width) * 4)] === floodStartColor.r && imageData[((idx - $canvas.width) * 4) + 1] === floodStartColor.g && imageData[((idx - $canvas.width) * 4) + 2] === floodStartColor.b && imageData[((idx - $canvas.width) * 4) + 3] === floodStartColor.a) {
+      setFloodTop((idx - $canvas.width));
+    }
+  }
+  if((idx + $canvas.width) % $canvas.height < $canvas.height) {
+    if(imageData[((idx + $canvas.width) * 4)] === floodStartColor.r && imageData[((idx + $canvas.width) * 4) + 1] === floodStartColor.g && imageData[((idx + $canvas.width) * 4) + 2] === floodStartColor.b && imageData[((idx + $canvas.width) * 4) + 3] === floodStartColor.a) {
+      setFloodBottom((idx + $canvas.width));
+    }
+  }
+}
+function setFloodRight(idx) {
+  imageData[idx * 4] = styleColor[0];
+  imageData[(idx * 4) + 1] = styleColor[1];
+  imageData[(idx * 4) + 2] = styleColor[2];
+  imageData[(idx * 4) + 3] = floodStartColor.a;
+  if((idx + 1) % $canvas.width !== 0) {
+    if(imageData[((idx + 1) * 4)] === floodStartColor.r && imageData[((idx + 1) * 4) + 1] === floodStartColor.g && imageData[((idx + 1) * 4) + 2] === floodStartColor.b && imageData[((idx + 1) * 4) + 3] === floodStartColor.a) {
+      setFloodRight((idx + 1));
+    }
+  }
+  if((idx - $canvas.width) > -1) {
+    if(imageData[((idx - $canvas.width) * 4)] === floodStartColor.r && imageData[((idx - $canvas.width) * 4) + 1] === floodStartColor.g && imageData[((idx - $canvas.width) * 4) + 2] === floodStartColor.b && imageData[((idx - $canvas.width) * 4) + 3] === floodStartColor.a) {
+      setFloodTop((idx - $canvas.width));
+    }
+  }
+  if((idx + $canvas.width) % $canvas.height < $canvas.height) {
+    if(imageData[((idx + $canvas.width) * 4)] === floodStartColor.r && imageData[((idx + $canvas.width) * 4) + 1] === floodStartColor.g && imageData[((idx + $canvas.width) * 4) + 2] === floodStartColor.b && imageData[((idx + $canvas.width) * 4) + 3] === floodStartColor.a) {
+      setFloodBottom((idx + $canvas.width));
+    }
+  }
+}
+function setFloodTop(idx) {
+  imageData[idx * 4] = styleColor[0];
+  imageData[(idx * 4) + 1] = styleColor[1];
+  imageData[(idx * 4) + 2] = styleColor[2];
+  imageData[(idx * 4) + 3] = floodStartColor.a;
+  if((idx - $canvas.width) > -1) {
+    if(imageData[((idx - $canvas.width) * 4)] === floodStartColor.r && imageData[((idx - $canvas.width) * 4) + 1] === floodStartColor.g && imageData[((idx - $canvas.width) * 4) + 2] === floodStartColor.b && imageData[((idx - $canvas.width) * 4) + 3] === floodStartColor.a) {
+      setFloodTop((idx - $canvas.width));
+    }
+  }
+  if((idx - 1) % $canvas.width !== $canvas.width - 1) {
+    if(imageData[((idx - 1) * 4)] === floodStartColor.r && imageData[((idx - 1) * 4) + 1] === floodStartColor.g && imageData[((idx - 1) * 4) + 2] === floodStartColor.b && imageData[((idx - 1) * 4) + 3] === floodStartColor.a) {
+      setFloodLeft((idx - 1));
+    }
+  }
+  if((idx + 1) % $canvas.width !== 0) {
+    if(imageData[((idx + 1) * 4)] === floodStartColor.r && imageData[((idx + 1) * 4) + 1] === floodStartColor.g && imageData[((idx + 1) * 4) + 2] === floodStartColor.b && imageData[((idx + 1) * 4) + 3] === floodStartColor.a) {
+      setFloodRight((idx + 1));
+    }
+  }
+}
+function setFloodBottom(idx) {
+  imageData[idx * 4] = styleColor[0];
+  imageData[(idx * 4) + 1] = styleColor[1];
+  imageData[(idx * 4) + 2] = styleColor[2];
+  imageData[(idx * 4) + 3] = floodStartColor.a;
+  if((idx + $canvas.width) % $canvas.height < $canvas.height) {
+    if(imageData[((idx + $canvas.width) * 4)] === floodStartColor.r && imageData[((idx + $canvas.width) * 4) + 1] === floodStartColor.g && imageData[((idx + $canvas.width) * 4) + 2] === floodStartColor.b && imageData[((idx + $canvas.width) * 4) + 3] === floodStartColor.a) {
+      setFloodBottom((idx + $canvas.width));
+    }
+  }
+  if((idx - 1) % $canvas.width !== $canvas.width - 1) {
+    if(imageData[((idx - 1) * 4)] === floodStartColor.r && imageData[((idx - 1) * 4) + 1] === floodStartColor.g && imageData[((idx - 1) * 4) + 2] === floodStartColor.b && imageData[((idx - 1) * 4) + 3] === floodStartColor.a) {
+      setFloodLeft((idx - 1));
+    }
+  }
+  if((idx + 1) % $canvas.width !== 0) {
+    if(imageData[((idx + 1) * 4)] === floodStartColor.r && imageData[((idx + 1) * 4) + 1] === floodStartColor.g && imageData[((idx + 1) * 4) + 2] === floodStartColor.b && imageData[((idx + 1) * 4) + 3] === floodStartColor.a) {
+      setFloodRight((idx + 1));
+    }
+  }
 }
 
 function brushToolBarFunction() {
@@ -542,6 +653,10 @@ function brushPreview() {
     previewCtx.lineTo($preview.width / 2, $preview.height / 2 + 40);
     previewCtx.stroke();
   };
+  if(drawingStyle === "floodFill") {
+    previewCtx.filter = `blur(0px)`;
+    previewCtx.fillRect(0, 0, $preview.width, $preview.height);
+  }
 }
 
 function nextHex() {
@@ -580,7 +695,7 @@ function setHex(hex) {
   hex = hex.replace(/#/gi, "");
   let hexCode = hex = hex.split("");
   switch(hexCode.length) {
-    case 6 : return `#${hex}`;
+    case 6 : return `#${hexCode[0]}${hexCode[1]}${hexCode[2]}${hexCode[3]}${hexCode[4]}${hexCode[5]}`;
     case 5 : return `#${hexCode[0]}${hexCode[1]}${hexCode[2]}${hexCode[3]}${hexCode[4]}${hexCode[4]}`;
     case 4 : return `#${hexCode[0]}${hexCode[1]}${hexCode[2]}${hexCode[2]}${hexCode[3]}${hexCode[3]}`;
     case 3 : return `#${hexCode[0]}${hexCode[0]}${hexCode[1]}${hexCode[1]}${hexCode[2]}${hexCode[2]}`;
@@ -592,3 +707,32 @@ function setHex(hex) {
 
 
 window.onload = init();
+
+
+
+// let leftIdx = true;
+// let rightIdx = true;
+// let idxLength = 1;
+// while (leftIdx === true || rightIdx === true) {
+//   // if(leftIdx === true) {
+//   //   pageAroundIdx = pageIdx - (4 * idxLength);
+//   //   if(imageData[pageAroundIdx] !== floodStartColor.r || imageData[pageAroundIdx + 1] !== floodStartColor.g || imageData[pageAroundIdx + 2] !== floodStartColor.b || imageData[pageAroundIdx + 3] !== floodStartColor.a) {
+//   //     leftIdx = false;
+//   //   }else if((pageAroundIdx / 4) % $canvas.width === 0) {
+//   //     leftIdx = false;
+//   //   }
+//   // }
+//   // if(rightIdx === true) {
+//   //   pageAroundIdx = pageIdx + (4 * idxLength);
+//   //   if(imageData[pageAroundIdx] !== floodStartColor.r || imageData[pageAroundIdx + 1] !== floodStartColor.g || imageData[pageAroundIdx + 2] !== floodStartColor.b || imageData[pageAroundIdx + 3] !== floodStartColor.a) {
+//   //     rightIdx = false;
+//   //   }else if((pageAroundIdx / 4) % $canvas.width === 0) {
+//   //     rightIdx = false;
+//   //   }
+//   // }
+//   // rightIdx = false;
+//   // leftIdx = false;
+//   idxLength++;
+// }
+// ctx.fillRect(pageX, pageY, idxLength - 1, 1);
+// ctx.fillRect(pageX - idxLength + 2, pageY, idxLength - 1, 1);
