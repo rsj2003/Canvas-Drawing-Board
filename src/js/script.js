@@ -52,13 +52,18 @@ const $preview = document.getElementById("preview");
 const previewCtx = $preview.getContext("2d");
 const $toolBarToggleButton = document.querySelectorAll(".toolBarToggleButton");
 const $brushButton = document.getElementById("brushButton");
+const $brushSizeRange = document.getElementById("brushSizeRange");
+const $brushSize = document.getElementById("brushSize");
+const $brushBlurRange = document.getElementById("brushBlurRange");
+const $brushBlur = document.getElementById("brushBlur");
+const $rangeInputs = document.querySelectorAll(".rangeInputWarp input");
 
 function init() {
   const loading = document.getElementById("loadingPage");
 
   paletteFunction();
   canvasFunction();
-  brushPreview();
+  brushToolBarFunction();
   
 
   $canvas.width = 1200;
@@ -116,7 +121,7 @@ function paletteFunction() {
     if(e.target === $colorInput) {
       $color.value = setHex($colorInput.value);
     }
-    canvasLoad();
+    brushPreview();
   })
 
   $colorInput.addEventListener("blur", e => {
@@ -461,14 +466,14 @@ function canvasFunction() {
   })
 }
 
-function brushPreview() {
+function brushToolBarFunction() {
   $preview.width = 120;
   $preview.height = 120;
 
   previewCtx.fillStyle = "#fff";
   previewCtx.fillRect(0, 0, $preview.width, $preview.height);
 
-  canvasLoad();
+  brushPreview();
 
   $toolBarToggleButton.forEach(i => i.addEventListener("click", e => {
     e.target.closest(".toolBars").classList.toggle("toggle");
@@ -484,11 +489,29 @@ function brushPreview() {
     }
     $brushButton.querySelector(".select").classList.remove("select");
     e.target.classList.add("select");
-    canvasLoad();
+    brushPreview();
+  }))
+
+  $rangeInputs.forEach(i => i.addEventListener("input", e => {
+    let targetId = e.target.id.replace(/Range|brush/gi, "");
+    let value = e.target.value
+    if(targetId === "Size") {
+      if(value < 1) value = 1;
+      $brushSize.value = value;
+      $brushSizeRange.value = value;
+      drawingSize = value;
+    }
+    if(targetId === "Blur") {
+      if(value < 0) value = 0;
+      $brushBlur.value = value;
+      $brushBlurRange.value = value;
+      drawingBlur = value;
+    }
+    brushPreview();
   }))
 }
 
-function canvasLoad() {
+function brushPreview() {
   previewCtx.beginPath();
   previewCtx.fillStyle = "#fff";
   previewCtx.fillRect(0, 0, $preview.width, $preview.height);

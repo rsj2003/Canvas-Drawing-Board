@@ -8,6 +8,7 @@
 <body>
   <div id="loadingPage">
     <div class="loadingCircleL loadingCircle"></div>
+    <div class="loadingCircleM loadingCircle"></div>
     <div class="loadingCircleS loadingCircle"></div>
     <p class="loadingText">loading<span>.</span><span>.</span><span>.</span></p>
   </div>
@@ -49,6 +50,14 @@
           <button id="circle" class="toolBarButton active">circle</button>
           <button id="line" class="toolBarButton active select">line</button>
           <button id="roundLine" class="toolBarButton active">round line</button>
+        </div>
+        <div id="brushSizeInput" class="rangeInputWarp">
+          <input type="range" id="brushSizeRange" min="1" max="100" value="5" class="inputRange">
+          <input type="number" id="brushSize" min="1" value="5">
+        </div>
+        <div id="brushBlurInput" class="rangeInputWarp">
+          <input type="range" id="brushBlurRange" min="0" max="100" value="0" class="inputRange">
+          <input type="number" id="brushBlur" min="0" value="0">
         </div>
       </div>
     </div>
