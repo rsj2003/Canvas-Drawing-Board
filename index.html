@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
   <title>Drawing Board</title>
   <link rel="stylesheet" href="./src/css/style.css">
@@ -53,16 +54,25 @@
           <input type="range" id="brushBlurRange" min="0" max="100" value="0" class="inputRange">
           <input type="number" id="brushBlur" min="0" value="0">
         </div>
+        <div id="brushAlphaInput" class="rangeInputWarp">
+          <input type="range" id="brushAlphaRange" min="0" max="1" value="1" class="inputRange" step="0.01">
+          <input type="number" id="brushAlpha" min="0" mas="1" value="1" step="0.01">
+        </div>
         <div id="brushButton" class="toolBarButtonList">
           <button id="pixel" class="toolBarButton active">pixel</button>
           <button id="circle" class="toolBarButton active">circle</button>
           <button id="line" class="toolBarButton active select">line</button>
           <button id="roundLine" class="toolBarButton active">round line</button>
           <button id="floodFill" class="toolBarButton active">flood fill</button>
+          <button id="clear" class="toolBarButton active">clear</button>
         </div>
       </div>
     </div>
   </div>
+  <script src="./src/js/toolBar.js"></script>
+  <script src="./src/js/floodFill.js"></script>
+  <script src="./src/js/drawingCanvas.js"></script>
+  <script src="./src/js/palette.js"></script>
   <script src="./src/js/script.js"></script>
 </body>
 </html>
