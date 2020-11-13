@@ -120,6 +120,7 @@ function brushPreview() {
   previewCtx.strokeStyle = $color.value + drawingAlpha[0];
   previewCtx.lineWidth = drawingSize;
   previewCtx.filter = `blur(${drawingBlur}px)`;
+  previewCtx.lineCap = "butt";
   let pixelSize = drawingSize;
 
   if(previewCtx.lineWidth > 30) previewCtx.lineWidth = 30;
@@ -131,14 +132,7 @@ function brushPreview() {
     previewCtx.fill();
   };
   if(drawingStyle === "line" || drawingStyle === "pen") {
-    if(strokeStyle === "round") {
-      previewCtx.arc($preview.width / 2, $preview.height / 2 - 40, previewCtx.lineWidth / 2, 0, Math.PI * 2, false);
-      previewCtx.fill();
-      previewCtx.beginPath();
-      previewCtx.arc($preview.width / 2, $preview.height / 2 + 40, previewCtx.lineWidth / 2, 0, Math.PI * 2, false);
-      previewCtx.fill();
-      previewCtx.beginPath();
-    };
+    if(strokeStyle === "round") previewCtx.lineCap = "round";
     previewCtx.moveTo($preview.width / 2, $preview.height / 2 - 40);
     previewCtx.lineTo($preview.width / 2, $preview.height / 2 + 40);
     previewCtx.stroke();
@@ -147,14 +141,7 @@ function brushPreview() {
     previewCtx.fillStyle = "#fff";
     previewCtx.fillRect(0, 0, $preview.width, $preview.height);
     previewCtx.globalCompositeOperation = "destination-out";
-    if(strokeStyle === "round") {
-      previewCtx.arc($preview.width / 2, $preview.height / 2 - 40, previewCtx.lineWidth / 2, 0, Math.PI * 2, false);
-      previewCtx.fill();
-      previewCtx.beginPath();
-      previewCtx.arc($preview.width / 2, $preview.height / 2 + 40, previewCtx.lineWidth / 2, 0, Math.PI * 2, false);
-      previewCtx.fill();
-      previewCtx.beginPath();
-    };
+    if(strokeStyle === "round") previewCtx.lineCap = "round";
     previewCtx.moveTo($preview.width / 2, $preview.height / 2 - 40);
     previewCtx.lineTo($preview.width / 2, $preview.height / 2 + 40);
     previewCtx.stroke();

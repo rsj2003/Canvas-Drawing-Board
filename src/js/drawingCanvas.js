@@ -87,6 +87,7 @@ function canvasFunction() {
         $colorBar.style.pointerEvents = "none";
         $canvasPage.style.pointerEvents = "none";
         ctx.lineJoin = "miter";
+        ctx.lineCap = "butt";
         drawingAlpha = (drawingOpacity * 256).toString(16).split(".");
         if(drawingAlpha[0].length === 1) drawingAlpha[0] = "0" + drawingAlpha[0];
         if(drawingAlpha[0].length === 3) drawingAlpha[0] = "ff";
@@ -97,9 +98,7 @@ function canvasFunction() {
         loadDrawing.setAttribute("src", drawingUndoList[drawingUndoList.length - 1]);
         drawingLine = [{x: e.offsetX, y: e.offsetY}, {x: e.offsetX, y: e.offsetY}];if(strokeStyle === "round") {
           ctx.lineJoin = "round";
-          ctx.beginPath();
-          ctx.arc(drawingLine[0].x, drawingLine[0].y, drawingSize / 2, 0, Math.PI * 2, false);
-          ctx.fill();
+          ctx.lineCap = "round";
         }
         ctx.moveTo(e.offsetX, e.offsetY);
         return;
@@ -112,7 +111,7 @@ function canvasFunction() {
       }
       drawingLine.push({x: mouseX, y: mouseY});
       // ctx.lineTo(e.offsetX, e.offsetY);
-      ctx.stroke();
+      // ctx.stroke();
     }
   });
 
@@ -139,14 +138,6 @@ function canvasFunction() {
         ctx.stroke();
         $toolBar.style.pointerEvents = "";
         $colorBar.style.pointerEvents = "";
-        if(strokeStyle === "round") {
-          ctx.beginPath();
-          ctx.arc(drawingLine[0].x, drawingLine[0].y, drawingSize / 2, 0, Math.PI * 2, false);
-          ctx.fill();
-          ctx.beginPath();
-          ctx.arc(mouseX, mouseY, drawingSize / 2, 0, Math.PI * 2, false);
-          ctx.fill();
-        }
         $canvasPage.style.pointerEvents = "";
         $undo.classList.add("active");
         penDrawing = false;
@@ -174,6 +165,7 @@ function canvasFunction() {
       $colorBar.style.pointerEvents = "none";
       $canvasPage.style.pointerEvents = "none";
       ctx.lineJoin = "miter";
+      ctx.lineCap = "butt";
       drawingAlpha = (drawingOpacity * 256).toString(16).split(".");
       if(drawingAlpha[0].length === 1) drawingAlpha[0] = "0" + drawingAlpha[0];
       if(drawingAlpha[0].length === 3) drawingAlpha[0] = "ff";
@@ -190,9 +182,7 @@ function canvasFunction() {
         if(drawingStyle === "eraser") ctx.globalCompositeOperation = "destination-out";
         if(strokeStyle === "round") {
           ctx.lineJoin = "round";
-          ctx.arc(e.offsetX, e.offsetY, drawingSize / 2, 0, Math.PI * 2, false);
-          ctx.fill();
-          ctx.beginPath();
+          ctx.lineCap = "round";
         };
         if(drawingStyle === "eraser") ctx.globalCompositeOperation = "source-over";
         loadDrawing.setAttribute("src", drawingUndoList[drawingUndoList.length - 1]);
@@ -225,14 +215,6 @@ function canvasFunction() {
         ctx.drawImage(loadDrawing, 0, 0, $canvas.width, $canvas.height, 0, 0, $canvas.width, $canvas.height);  
         ctx.filter = `blur(${drawingBlur}px)`;
         if(drawingStyle === "eraser") ctx.globalCompositeOperation = "destination-out";
-        if(strokeStyle === "round") {
-          ctx.beginPath();
-          ctx.arc(drawingLine[0].x, drawingLine[0].y, drawingSize / 2, 0, Math.PI * 2, false);
-          ctx.fill();
-          ctx.beginPath();
-          ctx.arc(mouseX, mouseY, drawingSize / 2, 0, Math.PI * 2, false);
-          ctx.fill();
-        }
         ctx.beginPath();
         drawingLine.push({x: mouseX, y: mouseY});
         drawingLine.forEach((i, l) => {
@@ -249,14 +231,6 @@ function canvasFunction() {
         ctx.clearRect(0, 0, $canvas.width, $canvas.height);
         ctx.drawImage(loadDrawing, 0, 0, $canvas.width, $canvas.height, 0, 0, $canvas.width, $canvas.height);  
         ctx.filter = `blur(${drawingBlur}px)`;
-        if(strokeStyle === "round") {
-          ctx.beginPath();
-          ctx.arc(drawingLine[0].x, drawingLine[0].y, drawingSize / 2, 0, Math.PI * 2, false);
-          ctx.fill();
-          ctx.beginPath();
-          ctx.arc(mouseX, mouseY, drawingSize / 2, 0, Math.PI * 2, false);
-          ctx.fill();
-        }
         ctx.beginPath();
         drawingLine[drawingLine.length - 1] = {x: mouseX, y: mouseY};
         drawingLine.forEach((i, l) => {
@@ -314,14 +288,6 @@ function canvasMouseUp(e) {
     }
     $toolBar.style.pointerEvents = "";
     $colorBar.style.pointerEvents = "";
-    if(strokeStyle === "round") {
-      ctx.beginPath();
-      ctx.arc(drawingLine[0].x, drawingLine[0].y, drawingSize / 2, 0, Math.PI * 2, false);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(mouseX, mouseY, drawingSize / 2, 0, Math.PI * 2, false);
-      ctx.fill();
-    }
     ctx.globalCompositeOperation = "source-over";
     $canvasPage.style.pointerEvents = "";
     $undo.classList.add("active");
