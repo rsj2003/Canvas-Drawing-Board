@@ -50,6 +50,11 @@ function key() {
       return false;
     }
   })
+  // document.addEventListener("mousewheel", e => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+  //   return false;
+  // })
 }
 
 function nextHex() {

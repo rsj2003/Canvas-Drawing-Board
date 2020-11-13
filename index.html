@@ -15,7 +15,7 @@
   </div>
   <div id="page">
     <div id="canvasPage">
-      <canvas id="canvas"></canvas>
+      <canvas id="canvas" class="backgroundPattern"></canvas>
     </div>
     <div id="colorBar">
       <div id="controller" class="toolBars toggle">
@@ -41,28 +41,40 @@
     <div id="toolBar" class="toolBars toggle">
       <div class="toolBarToggleButton"><span class="toolBarActive">&ltrif;</span><span class="toolBarInactive">&rtrif;</span></div>
       <div class="toolBarWarp">
-        <canvas id="preview"></canvas>
+        <canvas id="preview" class="backgroundPattern"></canvas>
         <div id="HistoryButton" class="toolBarButtonList">
           <button id="undo" class="toolBarButton">undo</button>
           <button id="redo" class="toolBarButton">redo</button>
         </div>
         <div id="brushSizeInput" class="rangeInputWarp">
+          <p>brush size</p>
           <input type="range" id="brushSizeRange" min="1" max="100" value="5" class="inputRange">
           <input type="number" id="brushSize" min="1" value="5">
         </div>
         <div id="brushBlurInput" class="rangeInputWarp">
+          <p>blur size</p>
           <input type="range" id="brushBlurRange" min="0" max="100" value="0" class="inputRange">
           <input type="number" id="brushBlur" min="0" value="0">
         </div>
         <div id="brushAlphaInput" class="rangeInputWarp">
+          <p>opacity</p>
           <input type="range" id="brushAlphaRange" min="0" max="1" value="1" class="inputRange" step="0.01">
           <input type="number" id="brushAlpha" min="0" mas="1" value="1" step="0.01">
+        </div>
+        <div id="brushFloodFillInput" class="rangeInputWarp hidden">
+          <p>Accuracy</p>
+          <input type="range" id="brushFloodFillRange" min="0" max="255" value="0" class="inputRange">
+          <input type="number" id="brushFloodFill" min="0" mas="255" value="0">
         </div>
         <div id="brushButton" class="toolBarButtonList">
           <button id="pixel" class="toolBarButton active">pixel</button>
           <button id="circle" class="toolBarButton active">circle</button>
           <button id="line" class="toolBarButton active select">line</button>
-          <button id="roundLine" class="toolBarButton active">round line</button>
+          <button id="lineRound" class="toolBarButton active">round line</button>
+          <button id="pen" class="toolBarButton active">pen</button>
+          <button id="penRound" class="toolBarButton active">round pen</button>
+          <button id="eraser" class="toolBarButton active">eraser</button>
+          <button id="eraserRound" class="toolBarButton active">round eraser</button>
           <button id="floodFill" class="toolBarButton active">flood fill</button>
           <button id="clear" class="toolBarButton active">clear</button>
         </div>

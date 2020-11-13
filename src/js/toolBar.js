@@ -18,6 +18,9 @@ const $brushBlurRange = document.getElementById("brushBlurRange");
 const $brushBlur = document.getElementById("brushBlur");
 const $brushAlphaRange = document.getElementById("brushAlphaRange");
 const $brushAlpha = document.getElementById("brushAlpha");
+const $brushFloodFillInput = document.getElementById("brushFloodFillInput");
+const $brushFloodFillRange = document.getElementById("brushFloodFillRange");
+const $brushFloodFill = document.getElementById("brushFloodFill");
 const $rangeInputs = document.querySelectorAll(".rangeInputWarp input");
 
 function addPaletteHistory() {
@@ -33,8 +36,8 @@ function brushToolBarFunction() {
   $preview.width = 120;
   $preview.height = 120;
 
-  previewCtx.fillStyle = "#fff";
-  previewCtx.fillRect(0, 0, $preview.width, $preview.height);
+  // previewCtx.fillStyle = "#fff";
+  // previewCtx.fillRect(0, 0, $preview.width, $preview.height);
 
   brushPreview();
 
@@ -43,25 +46,34 @@ function brushToolBarFunction() {
   }));
 
   $brushButton.querySelectorAll("button").forEach(i => i.addEventListener("click", e => {
-    if(e.target.id === "roundLine") {
-      drawingStyle = "line";
-      strokeStyle = "round";
-    }else if(e.target.id === "clear") {
+    let id = e.target.id
+    if(id !== "clear") {
+      if(id.indexOf("Round") > -1) {
+        strokeStyle = "round";
+        id = id.replace(/Round/gi, "");
+      }else {
+        strokeStyle = "";
+      }
+      $brushButton.querySelector(".select").classList.remove("select");
+      e.target.classList.add("select");
+    }
+    if(id === "clear") {
       drawingUndoList.push(canvas.toDataURL());
       drawingRedoList = [];
       $redo.classList.remove("active");
       $undo.classList.add("active");
+      ctx.filter = `blur(0px)`;
       ctx.fillStyle = "#fff";
       ctx.fillRect(0, 0, $canvas.width, $canvas.height);
     }else {
-      strokeStyle = "";
-      drawingStyle = e.target.id;
+      drawingStyle = id;
     }
-    if(e.target.id !== "clear") {
-      $brushButton.querySelector(".select").classList.remove("select");
-      e.target.classList.add("select");
-      brushPreview();
-    }
+    brushPreview();
+    // if(id ==="floodFill") {
+    //   $brushFloodFillInput.classList.remove("hidden");
+    // }else {
+    //   $brushFloodFillInput.classList.add("hidden");
+    // }
   }))
 
   $rangeInputs.forEach(i => i.addEventListener("input", e => {
@@ -86,14 +98,21 @@ function brushToolBarFunction() {
       $brushAlphaRange.value = value;
       drawingOpacity = value;
     }
+    if(targetId === "FloodFill") {
+      if(value < 0) value = 0;
+      if(value > 255) value = 255;
+      $brushFloodFill.value = value;
+      $brushFloodFillRange.value = value;
+      floodAccuracy = value;
+    }
     brushPreview();
   }))
 }
 
 function brushPreview() {
   previewCtx.beginPath();
-  previewCtx.fillStyle = "#fff";
-  previewCtx.fillRect(0, 0, $preview.width, $preview.height);
+  // previewCtx.fillStyle = "#fff";
+  previewCtx.clearRect(0, 0, $preview.width, $preview.height);
   drawingAlpha = (drawingOpacity * 256).toString(16).split(".");
   if(drawingAlpha[0].length === 1) drawingAlpha[0] = "0" + drawingAlpha[0];
   if(drawingAlpha[0].length === 3) drawingAlpha[0] = "ff";
@@ -111,7 +130,7 @@ function brushPreview() {
     previewCtx.arc($preview.width / 2, $preview.height / 2, pixelSize / 2, 0, Math.PI * 2, false);
     previewCtx.fill();
   };
-  if(drawingStyle === "line") {
+  if(drawingStyle === "line" || drawingStyle === "pen") {
     if(strokeStyle === "round") {
       previewCtx.arc($preview.width / 2, $preview.height / 2 - 40, previewCtx.lineWidth / 2, 0, Math.PI * 2, false);
       previewCtx.fill();
@@ -123,6 +142,23 @@ function brushPreview() {
     previewCtx.moveTo($preview.width / 2, $preview.height / 2 - 40);
     previewCtx.lineTo($preview.width / 2, $preview.height / 2 + 40);
     previewCtx.stroke();
+  };
+  if(drawingStyle === "eraser") {
+    previewCtx.fillStyle = "#fff";
+    previewCtx.fillRect(0, 0, $preview.width, $preview.height);
+    previewCtx.globalCompositeOperation = "destination-out";
+    if(strokeStyle === "round") {
+      previewCtx.arc($preview.width / 2, $preview.height / 2 - 40, previewCtx.lineWidth / 2, 0, Math.PI * 2, false);
+      previewCtx.fill();
+      previewCtx.beginPath();
+      previewCtx.arc($preview.width / 2, $preview.height / 2 + 40, previewCtx.lineWidth / 2, 0, Math.PI * 2, false);
+      previewCtx.fill();
+      previewCtx.beginPath();
+    };
+    previewCtx.moveTo($preview.width / 2, $preview.height / 2 - 40);
+    previewCtx.lineTo($preview.width / 2, $preview.height / 2 + 40);
+    previewCtx.stroke();
+    previewCtx.globalCompositeOperation = "source-over";
   };
   if(drawingStyle === "floodFill") {
     previewCtx.clearRect(0, 0, $preview.width, $preview.height);

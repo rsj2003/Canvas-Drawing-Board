@@ -3,13 +3,15 @@ let dstData;
 let pageIdx;
 let floodStartColor = new Object();
 let floodTodo;
+let floodAccuracy = 0;
 
 function getPixelIdx(x, y) {
 	return (y * $canvas.width + x) * 4;
 };
 
 function matchFloodColor(data, idx, color) {
-  return (data[idx]   === color.r && data[idx + 1] === color.g && data[idx + 2] === color.b && data[idx + 3] === color.a);
+  return (data[idx] === color.r && data[idx + 1] === color.g && data[idx + 2] === color.b && data[idx + 3] === color.a);
+  // return ((data[idx] <= color.r + floodAccuracy && data[idx] >= color.r - floodAccuracy) && (data[idx + 1] <= color.g + floodAccuracy && data[idx + 1] >= color.g - floodAccuracy) && (data[idx + 2] <= color.b + floodAccuracy && data[idx + 2] >= color.b - floodAccuracy) && (data[idx + 3] <= color.a + (floodAccuracy / 255) && data[idx + 3] >= color.a - (floodAccuracy / 255)));
 };
 
 function colorPixel(data, idx, color) {
