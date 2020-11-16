@@ -7,7 +7,7 @@ const ctx = $canvas.getContext("2d");
 let drawing = false;
 let drawingSize = 5;
 let drawingStyle = "line";
-let strokeStyle = "";
+let strokeStyle = "round";
 let drawingBlur = 0;
 let drawingLine = new Array();
 let drawingUndoList = new Array();
@@ -16,12 +16,22 @@ let loadDrawing = document.createElement("img");
 let drawingOpacity = 1;
 let drawingAlpha = "ff";
 let penDrawing = false;
+let canDrawing = true;
 
 // canvas drawing
 function canvasFunction() {
   let reSize = Math.ceil(getComputedStyle($toolBar).getPropertyValue("width").replace(/px/gi, "") / window.innerWidth * 100) * 2;
   $canvasPage.style.width = `${90 - reSize}%`;
   $canvasPage.style.height = `${90 - reSize}%`;
+
+  $canvas.width = 1200;
+  $canvas.height = 600;
+
+  $canvas.style.width = `${$canvas.width}px`;
+  $canvas.style.height = `${$canvas.height}px`;
+
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, $canvas.width, $canvas.height);
 
   document.addEventListener("click", e => {
     if(e.target === $undo) {
@@ -52,7 +62,7 @@ function canvasFunction() {
       }
       if(drawingRedoList.length <= 0) $redo.classList.remove("active");
     }
-    if(e.target === $canvas && drawingStyle === "floodFill") {
+    if(e.target === $canvas && drawingStyle === "floodFill" && canDrawing) {
       addPaletteHistory();
       drawingUndoList.push(canvas.toDataURL());
       drawingRedoList = [];
@@ -73,33 +83,11 @@ function canvasFunction() {
         floodFill(pageX, pageY, styleColor);
       }
     }
-    if(drawingStyle === "pen") {
+    if(drawingStyle === "pen" && canDrawing) {
       if(e.target === $canvas &&!penDrawing) {
-        addPaletteHistory();
-        drawingUndoList.push(canvas.toDataURL());
-        drawingRedoList = [];
-        $redo.classList.remove("active");
-        $undo.classList.add("active");
         penDrawing = true;
-        pageX = e.pageX - e.offsetX;
-        pageY = e.pageY - e.offsetY;
-        $toolBar.style.pointerEvents = "none";
-        $colorBar.style.pointerEvents = "none";
-        $canvasPage.style.pointerEvents = "none";
-        ctx.lineJoin = "miter";
-        ctx.lineCap = "butt";
-        drawingAlpha = (drawingOpacity * 256).toString(16).split(".");
-        if(drawingAlpha[0].length === 1) drawingAlpha[0] = "0" + drawingAlpha[0];
-        if(drawingAlpha[0].length === 3) drawingAlpha[0] = "ff";
-        ctx.fillStyle = $color.value + drawingAlpha[0];
-        ctx.strokeStyle = $color.value + drawingAlpha[0];
-        ctx.lineWidth = drawingSize;
-        ctx.filter = `blur(${drawingBlur}px)`;
-        loadDrawing.setAttribute("src", drawingUndoList[drawingUndoList.length - 1]);
-        drawingLine = [{x: e.offsetX, y: e.offsetY}, {x: e.offsetX, y: e.offsetY}];if(strokeStyle === "round") {
-          ctx.lineJoin = "round";
-          ctx.lineCap = "round";
-        }
+        brushReset(e);
+        drawingLine = [{x: e.offsetX, y: e.offsetY}, {x: e.offsetX, y: e.offsetY}];
         ctx.moveTo(e.offsetX, e.offsetY);
         return;
       }
@@ -110,13 +98,11 @@ function canvasFunction() {
         mouseY -= pageY;
       }
       drawingLine.push({x: mouseX, y: mouseY});
-      // ctx.lineTo(e.offsetX, e.offsetY);
-      // ctx.stroke();
     }
   });
 
   document.addEventListener("dblclick", e => {
-    if(drawingStyle === "pen" && penDrawing) {
+    if(drawingStyle === "pen" && penDrawing && canDrawing) {
       let img = document.createElement("img");
       let mouseX = e.offsetX - pageX;
       let mouseY = e.offsetY - pageY;
@@ -153,49 +139,24 @@ function canvasFunction() {
   })
 
   document.addEventListener("mousedown", e => {
-    if(e.target === $canvas && drawingStyle !== "floodFill" && drawingStyle !== "pen") {
-      if(drawingStyle !== "eraser") addPaletteHistory();
-      drawingUndoList.push(canvas.toDataURL());
-      drawingRedoList = [];
-      $redo.classList.remove("active");
+    if(e.target === $canvas && drawingStyle !== "floodFill" && drawingStyle !== "pen" && canDrawing) {
       drawing = true;
-      pageX = e.pageX - e.offsetX;
-      pageY = e.pageY - e.offsetY;
-      $toolBar.style.pointerEvents = "none";
-      $colorBar.style.pointerEvents = "none";
-      $canvasPage.style.pointerEvents = "none";
-      ctx.lineJoin = "miter";
-      ctx.lineCap = "butt";
-      drawingAlpha = (drawingOpacity * 256).toString(16).split(".");
-      if(drawingAlpha[0].length === 1) drawingAlpha[0] = "0" + drawingAlpha[0];
-      if(drawingAlpha[0].length === 3) drawingAlpha[0] = "ff";
-      ctx.fillStyle = $color.value + drawingAlpha[0];
-      ctx.strokeStyle = $color.value + drawingAlpha[0];
-      ctx.lineWidth = drawingSize;
-      ctx.filter = `blur(${drawingBlur}px)`;
+      brushReset(e);
       if(drawingStyle === "pixel") ctx.fillRect(e.offsetX - (drawingSize / 2), e.offsetY - (drawingSize / 2), drawingSize, drawingSize);
       if(drawingStyle === "circle") {
         ctx.arc(e.offsetX, e.offsetY, drawingSize / 2, 0, Math.PI * 2, false);
         ctx.fill();
       };
-      if(drawingStyle === "line" || drawingStyle === "eraser") {
-        if(drawingStyle === "eraser") ctx.globalCompositeOperation = "destination-out";
-        if(strokeStyle === "round") {
-          ctx.lineJoin = "round";
-          ctx.lineCap = "round";
-        };
-        if(drawingStyle === "eraser") ctx.globalCompositeOperation = "source-over";
-        loadDrawing.setAttribute("src", drawingUndoList[drawingUndoList.length - 1]);
+      if(drawingStyle === "line" || drawingStyle === "eraser" && canDrawing) {
         drawingLine = [{x: e.offsetX, y: e.offsetY}];
         ctx.moveTo(e.offsetX, e.offsetY);
-        // ctx.lineTo(e.offsetX, e.offsetY);
         ctx.stroke();
       };
     };
   });
 
   document.addEventListener("mousemove", e => {
-    if((drawing || penDrawing) && e.target === $page) {
+    if((drawing || penDrawing) && e.target === $page && canDrawing) {
       let mouseX = e.offsetX;
       let mouseY = e.offsetY;
       if(e.target === $page) {
@@ -246,7 +207,7 @@ function canvasFunction() {
   });
 
   document.addEventListener("mouseup", e => {
-    if(drawing === true) {
+    if(drawing && canDrawing) {
       canvasMouseUp(e);
     }
   });
@@ -262,10 +223,35 @@ function canvasFunction() {
   })
 }
 
+function brushReset(e) {
+  if(drawingStyle !== "eraser") addPaletteHistory();
+  drawingUndoList.push(canvas.toDataURL());
+  drawingRedoList = [];
+  $redo.classList.remove("active");
+  $undo.classList.add("active");
+  pageX = e.pageX - e.offsetX;
+  pageY = e.pageY - e.offsetY;
+  $toolBar.style.pointerEvents = "none";
+  $colorBar.style.pointerEvents = "none";
+  $canvasPage.style.pointerEvents = "none";
+  ctx.lineJoin = "miter";
+  ctx.lineCap = "butt";
+  drawingAlpha = (drawingOpacity * 256).toString(16).split(".");
+  if(drawingAlpha[0].length === 1) drawingAlpha[0] = "0" + drawingAlpha[0];
+  if(drawingAlpha[0].length === 3) drawingAlpha[0] = "ff";
+  ctx.fillStyle = $color.value + drawingAlpha[0];
+  ctx.strokeStyle = $color.value + drawingAlpha[0];
+  ctx.lineWidth = drawingSize;
+  ctx.filter = `blur(${drawingBlur}px)`;
+  loadDrawing.setAttribute("src", drawingUndoList[drawingUndoList.length - 1]);
+  if(strokeStyle === "round") {
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+  }
+}
+
 function canvasMouseUp(e) {
   let img = document.createElement("img");
-  let mouseX = e.offsetX - pageX;
-  let mouseY = e.offsetY - pageY;
   img.setAttribute("src", drawingUndoList[drawingUndoList.length - 1]);
   img.onload = function() {
     if(drawingStyle === "line" || drawingStyle === "eraser"){
@@ -275,16 +261,21 @@ function canvasMouseUp(e) {
       ctx.drawImage(img, 0, 0, $canvas.width, $canvas.height, 0, 0, $canvas.width, $canvas.height);
       ctx.filter = `blur(${drawingBlur}px)`;
       if(drawingStyle === "eraser") ctx.globalCompositeOperation = "destination-out";
-      for(let i = 0; i < drawingLine.length; i++) {
-        const moveX = drawingLine[i].x;
-        const moveY = drawingLine[i].y;
-        if(i === 0) {
-          ctx.moveTo(moveX, moveY);
-        }else{
-          ctx.lineTo(moveX, moveY);
+      if(drawingLine.length !== 1) {
+        for(let i = 0; i < drawingLine.length; i++) {
+          const moveX = drawingLine[i].x;
+          const moveY = drawingLine[i].y;
+          if(i === 0) {
+            ctx.moveTo(moveX, moveY);
+          }else{
+            ctx.lineTo(moveX, moveY);
+          }
         }
+        ctx.stroke();
+      }else {
+        ctx.arc(drawingLine[0].x, drawingLine[0].y, drawingSize / 2, 0, Math.PI * 2, false);
+        ctx.fill();
       }
-      ctx.stroke();
     }
     $toolBar.style.pointerEvents = "";
     $colorBar.style.pointerEvents = "";

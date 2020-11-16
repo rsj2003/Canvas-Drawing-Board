@@ -22,6 +22,15 @@ const $brushFloodFillInput = document.getElementById("brushFloodFillInput");
 const $brushFloodFillRange = document.getElementById("brushFloodFillRange");
 const $brushFloodFill = document.getElementById("brushFloodFill");
 const $rangeInputs = document.querySelectorAll(".rangeInputWarp input");
+// canvas tool
+const $newWidth = document.getElementById("newWidth");
+const $newHeight = document.getElementById("newHeight");
+const $canvasResize = document.getElementById("canvasResize");
+const $canvasResizeSize = document.getElementById("canvasResizeSize");
+const $canvasCreateButton = document.getElementById("create");
+const $canvasCancleButton = document.getElementById("cancle");
+let resizeWidth = 1200;
+let resizeHeight = 600;
 
 function addPaletteHistory() {
   if(paletteHistory.indexOf($color.value) > -1) paletteHistory.splice(paletteHistory.indexOf($color.value), 1);
@@ -40,14 +49,15 @@ function brushToolBarFunction() {
   // previewCtx.fillRect(0, 0, $preview.width, $preview.height);
 
   brushPreview();
-
+  resize();
+  
   $toolBarToggleButton.forEach(i => i.addEventListener("click", e => {
     e.target.closest(".toolBars").classList.toggle("toggle");
   }));
 
   $brushButton.querySelectorAll("button").forEach(i => i.addEventListener("click", e => {
     let id = e.target.id
-    if(id !== "clear") {
+    if(id !== "clear" && id !== "newProject") {
       if(id.indexOf("Round") > -1) {
         strokeStyle = "round";
         id = id.replace(/Round/gi, "");
@@ -65,6 +75,10 @@ function brushToolBarFunction() {
       ctx.filter = `blur(0px)`;
       ctx.fillStyle = "#fff";
       ctx.fillRect(0, 0, $canvas.width, $canvas.height);
+    }else if(id === "newProject") {
+      $canvasResize.classList.remove("hidden");
+      $popBackground.classList.remove("hidden");
+      canDrawing = false;
     }else {
       drawingStyle = id;
     }
@@ -152,4 +166,50 @@ function brushPreview() {
     previewCtx.filter = `blur(0px)`;
     previewCtx.fillRect(0, 0, $preview.width, $preview.height);
   }
+}
+
+function resize() {
+  resizePreview();
+  $newHeight.addEventListener("input", resizePreview);
+  $newWidth.addEventListener("input", resizePreview);
+
+  $canvasCreateButton.addEventListener("click", e => {
+    resizeWidth = Number($newWidth.value);
+    resizeHeight = Number($newHeight.value);
+
+    $canvas.width = resizeWidth;
+    $canvas.height = resizeHeight;
+
+    $canvas.style.width = `${resizeWidth}px`;
+    $canvas.style.height = `${resizeHeight}px`;
+
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, $canvas.width, $canvas.height);
+
+    $canvasResize.classList.add("hidden");
+    $popBackground.classList.add("hidden");
+    canDrawing = true;
+  })
+  $canvasCancleButton.addEventListener("click", e => {
+    $canvasResize.classList.add("hidden");
+    $popBackground.classList.add("hidden");
+    canDrawing = true;
+  })
+}
+
+function resizePreview() {
+  resizeWidth = Number($newWidth.value);
+  resizeHeight = Number($newHeight.value);
+  if(resizeWidth > resizeHeight) {
+    $canvasResizeSize.style.width = `80%`;
+    $canvasResizeSize.style.height = `${resizeHeight / resizeWidth * 80}%`;
+    return;
+  }
+  if(resizeWidth < resizeHeight) {
+    $canvasResizeSize.style.width = `${resizeWidth / resizeHeight * 80}%`;
+    $canvasResizeSize.style.height = `80%`;
+    return;
+  }
+  $canvasResizeSize.style.width = `80%`;
+  $canvasResizeSize.style.height = `80%`;
 }

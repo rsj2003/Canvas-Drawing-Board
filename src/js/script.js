@@ -1,4 +1,5 @@
 const $page = document.getElementById("page");
+const $popBackground = document.getElementById("popBackground");
 let x = 0;
 let oldX = 0;
 let y = 0;
@@ -8,7 +9,9 @@ let dragX = false;
 let dragY = false;
 let pageX = 0;
 let pageY = 0;
-
+let pressShift = false;
+let pressCtrl = false;
+let pressSpace = false;
 
 function init() {
   const loading = document.getElementById("loadingPage");
@@ -17,16 +20,6 @@ function init() {
   canvasFunction();
   brushToolBarFunction();
   key();
-
-  $canvas.width = 1200;
-  $canvas.height = 600;
-
-  $canvas.style.width = `${$canvas.width}px`;
-  $canvas.style.height = `${$canvas.height}px`;
-
-  ctx.fillStyle = "#fff";
-  ctx.fillRect(0, 0, $canvas.width, $canvas.height);
-
   
   setTimeout(_ => {
     loading.style.opacity = 0;
@@ -36,24 +29,24 @@ function init() {
 
 function key() {
   document.addEventListener("keydown", e => {
-    console.log(e.key);
-    if(e.key === "Control") {
-      e.preventDefault();
-      return false;
-    }
+    // console.log(e.key);
+    // if(e.key === "Control") {
+    //   e.preventDefault();
+    //   return false;
+    // }
   })
   document.addEventListener("keypress", e => {
-    console.log(e.key);
-    if(e.key === "Control") {
-      e.preventDefault();
-      e.returnValue = false;
-      return false;
-    }
+    // console.log(e.key);
+    // if(e.key === "Control") {
+    //   e.preventDefault();
+    //   e.returnValue = false;
+    //   return false;
+    // }
   })
   // document.addEventListener("mousewheel", e => {
-  //   e.preventDefault();
-  //   e.stopPropagation();
-  //   return false;
+    // e.preventDefault();
+    // e.stopPropagation();
+    // return false;
   // })
 }
 

@@ -17,6 +17,27 @@
     <div id="canvasPage">
       <canvas id="canvas" class="backgroundPattern"></canvas>
     </div>
+    <div id="popBackground" class="hidden">
+      <div id="canvasResize" class="hidden">
+        <div class="canvasResizeInput">
+          <div>
+            <p>width : </p>
+            <input type="number" name="newWidth" id="newWidth" value="1200" mint="1" placeholder="1200">
+          </div>
+          <div>
+            <p>height : </p>
+            <input type="number" name="newHeight" id="newHeight" value="600" mint="1" placeholder="600">
+          </div>
+          <div>
+            <button id="create">create</button>
+            <button id="cancle">cancle</button>
+          </div>
+        </div>
+        <div class="canvasResizeSize">
+          <div id="canvasResizeSize"></div>
+        </div>
+      </div>
+    </div>
     <div id="colorBar">
       <div id="controller" class="toolBars toggle">
         <div class="toolBarToggleButton"><span class="toolBarActive">&rtrif;</span><span class="toolBarInactive">&ltrif;</span></div>
@@ -41,7 +62,7 @@
     <div id="toolBar" class="toolBars toggle">
       <div class="toolBarToggleButton"><span class="toolBarActive">&ltrif;</span><span class="toolBarInactive">&rtrif;</span></div>
       <div class="toolBarWarp">
-        <canvas id="preview" class="backgroundPattern"></canvas>
+        <canvas id="preview" class="backgroundPattern canvasLayer"></canvas>
         <div id="HistoryButton" class="toolBarButtonList">
           <button id="undo" class="toolBarButton">undo</button>
           <button id="redo" class="toolBarButton">redo</button>
@@ -69,22 +90,23 @@
         <div id="brushButton" class="toolBarButtonList">
           <button id="pixel" class="toolBarButton active">pixel</button>
           <button id="circle" class="toolBarButton active">circle</button>
-          <button id="line" class="toolBarButton active select">line</button>
-          <button id="lineRound" class="toolBarButton active">round line</button>
+          <button id="line" class="toolBarButton active">pencil</button>
+          <button id="lineRound" class="toolBarButton active select">round pencil</button>
           <button id="pen" class="toolBarButton active">pen</button>
           <button id="penRound" class="toolBarButton active">round pen</button>
           <button id="eraser" class="toolBarButton active">eraser</button>
           <button id="eraserRound" class="toolBarButton active">round eraser</button>
           <button id="floodFill" class="toolBarButton active">flood fill</button>
           <button id="clear" class="toolBarButton active">clear</button>
+          <button id="newProject" class="toolBarButton active">new project</button>
         </div>
       </div>
     </div>
   </div>
+  <script src="./src/js/palette.js"></script>
+  <script src="./src/js/drawingCanvas.js"></script>
   <script src="./src/js/toolBar.js"></script>
   <script src="./src/js/floodFill.js"></script>
-  <script src="./src/js/drawingCanvas.js"></script>
-  <script src="./src/js/palette.js"></script>
   <script src="./src/js/script.js"></script>
 </body>
 </html>

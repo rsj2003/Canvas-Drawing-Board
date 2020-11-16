@@ -23,7 +23,9 @@
   
 /* main page */
   #page{position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: #222; overflow:hidden;}
-  .hidden{display: none;}
+  .hidden{display: none!important;}
+
+  #popBackground{width: 100%; height: 100%; position: absolute; left: 0; top: 0; background: #3333;}
 
   #colorBar{position: absolute; width: 100%; height: 100%; right: 0; top: 0;}  
   .toolBarWarp{width: 100%; height: 100%; position: absolute; overflow-y: auto;}
@@ -56,7 +58,7 @@
     .box{width: 250px; height: 400px; float: left; position: absolute; transform-origin: 0 1500px; transform: translateX(-50%); left: 50%; bottom: 1100px; border-radius: 8px; padding: 340px 20px 0; box-sizing: border-box;user-select: none; transition: .5s; cursor: pointer;}
     .box>span{ text-shadow: 0 0 5px #000; color: #fff; text-align: left; font-size: 30px; transform: rotate(90deg); display: block; position: absolute; left: 5px; bottom: 30px;}  
 
-  #canvasPage{width: 100%; height: 100%; position: absolute; max-width: 85%; max-height: 85%; overflow: auto; z-index: 200; left: 50%; top: 50%; transform: translate(-50%, -50%); border: 2px solid #777;}
+  #canvasPage{width: 100%; height: 100%; position: absolute; overflow: auto; z-index: 200; left: 50%; top: 50%; transform: translate(-50%, -50%); border: 2px solid #777;}
   #canvas.center{position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);}
 
   #toolBar{width: 200px; height: 55%; position: absolute; left: -200px; top: 50%; transform: translateY(-50%);background: #777; z-index: 200; border-radius: 2px; border: 2px solid #555; border-left: 0; transition: 0.5s;}
@@ -81,6 +83,13 @@
     .rangeInputWarp>.inputRange::-webkit-slider-thumb:hover{background: #aaa;}
     .rangeInputWarp>.inputRange::-webkit-slider-thumb:active{box-shadow: inset 0 0 3px #555;}
 
+    #canvasResize{width: 400px; height: 200px; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 10000; background: #555; color: #fff; padding: 30px; display: flex; justify-content: space-between;}
+    .canvasResizeInput{width: 180px; height: 100%; display: flex; justify-content: space-between; align-content: center; flex-direction: column;}
+    .canvasResizeInput>div:nth-of-type(1){margin-top: 20px;}
+    .canvasResizeInput>div:nth-of-type(2){margin-bottom: 30px;}
+    .canvasResizeInput button{width: 50px; height: 30px;}
+    .canvasResizeSize{width: 180px; height: 180px; margin: 9px; border: 1px solid #aaa; position: relative;}
+    #canvasResizeSize{background: #fff; width: 60%; height: 30%; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);}
 
 /* loading page animation */
 @keyframes CircleL{
