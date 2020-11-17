@@ -66,6 +66,7 @@ function canvasFunction() {
       if(styleColor.r !== floodStartColor.r || styleColor.g !== floodStartColor.g || styleColor.b !== floodStartColor.b || styleColor.a !== floodStartColor.a){
         floodFill(pageX, pageY, styleColor);
       }
+      layerPreviewImage[selectCanvas].setAttribute("src", canvas.toDataURL());
     }
     if(drawingStyle === "pen" && canDrawing) {
       if(e.target === $canvas &&!penDrawing) {

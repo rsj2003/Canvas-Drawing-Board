@@ -17,16 +17,27 @@ function canvasZoom() {
       $canvasZoomScale.style.opacity = 0;
     },0);
 
-    let maxWidth = $canvasPage.style.width.replace(/%/gi, "") * window.innerWidth / 100;
-    let maxHeight = $canvasPage.style.height.replace(/%/gi, "") * window.innerHeight / 100;
+    let maxWidth = $drawingPage.style.width.replace(/%/gi, "") * window.innerWidth / 100;
+    let maxHeight = $drawingPage.style.height.replace(/%/gi, "") * window.innerHeight / 100;
     let width = Number($canvas.style.width.replace(/px/gi, ""));
     let height = Number($canvas.style.height.replace(/px/gi, ""));
-    // console.log(maxWidth, Number($canvas.style.width.replace(/px/gi, "")));
-    if(maxWidth < width || maxHeight < height) {
-      $canvas.classList.remove("center");
+    $canvas.classList.remove("center");
+    $canvas.classList.remove("leftCenter");
+    $canvas.classList.remove("topCenter");
+    if(maxWidth >= width && maxHeight >= height) {
+      $canvas.classList.add("center");
       // $canvasPage.scrollTo((width - maxWidth), (height - maxHeight));
       return;
     }
-    $canvas.classList.add("center");
+    if(maxWidth < width && maxHeight >= height) {
+      $canvas.classList.add("topCenter");
+      // $canvasPage.scrollTo((width - maxWidth), (height - maxHeight));
+      return;
+    }
+    if(maxWidth >= width && maxHeight < height) {
+      $canvas.classList.add("leftCenter");
+      // $canvasPage.scrollTo((width - maxWidth), (height - maxHeight));
+      return;
+    }
   }
 }
