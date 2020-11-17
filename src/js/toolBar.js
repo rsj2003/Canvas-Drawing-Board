@@ -75,9 +75,6 @@ function brushToolBarFunction() {
       ctx.filter = `blur(0px)`;
       ctx.fillStyle = "#fff";
       ctx.fillRect(0, 0, $canvas.width, $canvas.height);
-      scale = 1;
-      $canvas.style.width = `${$canvas.width}px`;
-      $canvas.style.height = `${$canvas.height}px`;
       layerPreviewImage[selectCanvas].setAttribute("src", canvas.toDataURL());
     }else if(id === "newProject") {
       $canvasResize.classList.remove("hidden");
@@ -196,7 +193,27 @@ function resize() {
       drawingRedoList = new Array();
       $redo.classList.remove("active");
       layerPreviewImage[selectCanvas].setAttribute("src", canvas.toDataURL());
-  
+      
+      scale = 1;
+      normalSize = {width: resizeWidth, height: resizeHeight};
+      
+      let maxWidth = $drawingPage.style.width.replace(/%/gi, "") * window.innerWidth / 100;
+      let maxHeight = $drawingPage.style.height.replace(/%/gi, "") * window.innerHeight / 100;
+      let width = Number($canvas.style.width.replace(/px/gi, ""));
+      let height = Number($canvas.style.height.replace(/px/gi, ""));
+      $canvas.classList.remove("center");
+      $canvas.classList.remove("leftCenter");
+      $canvas.classList.remove("topCenter");
+      if(maxWidth >= width && maxHeight >= height) {
+        $canvas.classList.add("center");
+      }
+      if(maxWidth < width && maxHeight >= height) {
+        $canvas.classList.add("topCenter");
+      }
+      if(maxWidth >= width && maxHeight < height) {
+        $canvas.classList.add("leftCenter");
+      }
+
       $canvasResize.classList.add("hidden");
       $popBackground.classList.add("hidden");
       canDrawing = true;

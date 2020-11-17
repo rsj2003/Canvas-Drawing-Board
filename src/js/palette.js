@@ -80,7 +80,7 @@ function paletteFunction() {
         $palette.style.transition = ".5s";
         palette = 0;
         setTimeout(_ => {
-          $canvasPage.style.zIndex = "";
+          $drawingPage.style.zIndex = "";
           $palette.style.transition = "";
           palette = false;
         }, 500);
@@ -89,7 +89,7 @@ function paletteFunction() {
       if(palette === false) {
         $palette.style.bottom = "-800px";
         $palette.style.transition = ".5s";
-        $canvasPage.style.zIndex = "0";
+        $drawingPage.style.zIndex = "0";
         palette = 0;
         setTimeout(_ => {
           palette = true;
@@ -141,14 +141,14 @@ function paletteFunction() {
         $palette.style.transition = ".5s";
         palette = 0;
         setTimeout(_ => {
-          $canvasPage.style.zIndex = "";
+          $drawingPage.style.zIndex = "";
           $palette.style.transition = "";
           palette = false;
         }, 500);
       }else {
         $palette.style.bottom = "-800px";
         $palette.style.transition = ".5s";
-        $canvasPage.style.zIndex = "0";
+        $drawingPage.style.zIndex = "0";
         palette = 0;
         setTimeout(_ => {
           palette = true;
