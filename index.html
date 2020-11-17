@@ -8,14 +8,18 @@
 </head>
 <body>
   <div id="loadingPage">
+    <div class="loadingCircleX loadingCircle"></div>
     <div class="loadingCircleL loadingCircle"></div>
     <div class="loadingCircleM loadingCircle"></div>
     <div class="loadingCircleS loadingCircle"></div>
     <p class="loadingText">loading<span>.</span><span>.</span><span>.</span></p>
   </div>
   <div id="page">
-    <div id="canvasPage">
-      <canvas id="canvas" class="backgroundPattern"></canvas>
+    <div id="drawingPage">
+      <span id="canvasZoomScale">1</span>
+      <div id="canvasPage">
+        <canvas id="canvas" class="backgroundPattern" data-layer="0"></canvas>
+      </div>
     </div>
     <div id="popBackground" class="hidden">
       <div id="canvasResize" class="hidden">
@@ -100,9 +104,35 @@
           <button id="clear" class="toolBarButton active">clear</button>
           <button id="newProject" class="toolBarButton active">new project</button>
         </div>
+        <div id="layerTool">
+          <div id="layerList">
+            <div class="layerList view lock select" data-layer="0">
+              <div class="previewImageBackground">
+                <img src="" alt="" class="previewImage" data-layer="0">
+              </div>
+              <p class="viewButton active">view</p>
+            </div>
+            <!-- <div class="layerList view" data-layer="1">
+              <div class="previewImageBackground">
+                <img src="" alt="" class="previewImage" data-layer="1">
+              </div>
+              <p class="viewButton active">view</p>
+              <p class="deleteButton active">delete</p>
+            </div> -->
+            <!-- <div class="layerList view">
+              <div class="previewImageBackground">
+                <img src="" alt="" class="previewImage">
+              </div>
+              <p class="viewButton active">view</p>
+              <p class="deleteButton active">delete</p>
+            </div> -->
+          </div>
+          <div id="addLayer">add layer</div>
+        </div>
       </div>
     </div>
   </div>
+  <script src="./src/js/canvasZoom.js"></script>
   <script src="./src/js/palette.js"></script>
   <script src="./src/js/drawingCanvas.js"></script>
   <script src="./src/js/toolBar.js"></script>

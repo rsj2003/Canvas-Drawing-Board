@@ -12,12 +12,13 @@
   .loadingText>span:nth-of-type(2){animation-name: dot2;}
   .loadingText>span:nth-of-type(3){animation-name: dot3;}
 
-  .loadingCircleL{width: 60px; height: 30px; transform: translate(-50%, -100%) rotate(180deg); animation-name: CircleL; animation-duration: 2s;}
+  .loadingCircleX{width: 60px; height: 30px; transform: translate(-50%, -100%) rotate(180deg); animation-name: CircleX; animation-duration: 2s;}
+  .loadingCircleL{width: 40px; height: 40px; background: #444; border-radius: 50%; transform: translate(-50%, -50%)}
   .loadingCircleM{width: 40px; height: 20px; transform: translate(-50%, -100%) rotate(0); animation-name: CircleM; animation-duration: 1s;}
-  .loadingCircleS{width: 20px; height: 20px; background: #444; border-radius: 50%; transform: translate(-50%, -50%)}
+  .loadingCircleS{width: 20px; height: 20px; background: #444; border-radius: 50%; transform: translate(-50%, -50%);}
 
   .loadingCircle::before{border-radius: 50%;}
-  .loadingCircleL::before{content: ""; display: block; width: 60px; height: 60px; background: #fff;}
+  .loadingCircleX::before{content: ""; display: block; width: 60px; height: 60px; background: #fff;}
   .loadingCircleM::before{content: ""; display: block; width: 40px; height: 40px; background: #777;}
 
   
@@ -58,8 +59,10 @@
     .box{width: 250px; height: 400px; float: left; position: absolute; transform-origin: 0 1500px; transform: translateX(-50%); left: 50%; bottom: 1100px; border-radius: 8px; padding: 340px 20px 0; box-sizing: border-box;user-select: none; transition: .5s; cursor: pointer;}
     .box>span{ text-shadow: 0 0 5px #000; color: #fff; text-align: left; font-size: 30px; transform: rotate(90deg); display: block; position: absolute; left: 5px; bottom: 30px;}  
 
-  #canvasPage{width: 100%; height: 100%; position: absolute; overflow: auto; z-index: 200; left: 50%; top: 50%; transform: translate(-50%, -50%); border: 2px solid #777;}
+  #drawingPage{width: 100%; height: 100%; position: absolute; z-index: 200; left: 50%; top: 50%; transform: translate(-50%, -50%); border: 2px solid #777;}
+  #canvasPage{width: 100%; height: 100%; position: absolute; overflow: auto; left: 50%; top: 50%; transform: translate(-50%, -50%);}
   #canvas.center{position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);}
+  #canvasZoomScale{position: absolute; z-index: 200; background: #aaa; left: 0; top: 0; border: 2px solid #777; border-left: 0px; border-top: 0px; border-radius: 0 0 5px 0; display: block; width: 45px; text-align: center; pointer-events: none; opacity: 0;}
 
   #toolBar{width: 200px; height: 55%; position: absolute; left: -200px; top: 50%; transform: translateY(-50%);background: #777; z-index: 200; border-radius: 2px; border: 2px solid #555; border-left: 0; transition: 0.5s;}
     #toolBar.toggle{left: 0;}
@@ -84,15 +87,29 @@
     .rangeInputWarp>.inputRange::-webkit-slider-thumb:active{box-shadow: inset 0 0 3px #555;}
 
     #canvasResize{width: 400px; height: 200px; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 10000; background: #555; color: #fff; padding: 30px; display: flex; justify-content: space-between;}
-    .canvasResizeInput{width: 180px; height: 100%; display: flex; justify-content: space-between; align-content: center; flex-direction: column;}
+    .canvasResizeInput{width: 180px; height: 100%; display: flex; justify-content: space-between; align-items: center; flex-direction: column;}
     .canvasResizeInput>div:nth-of-type(1){margin-top: 20px;}
     .canvasResizeInput>div:nth-of-type(2){margin-bottom: 30px;}
     .canvasResizeInput button{width: 50px; height: 30px;}
     .canvasResizeSize{width: 180px; height: 180px; margin: 9px; border: 1px solid #aaa; position: relative;}
     #canvasResizeSize{background: #fff; width: 60%; height: 30%; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);}
 
+    #layerTool{width: 120px; height: 400px; background: #444; margin: 0 auto 30px;}
+    #addLayer{color: #fff; cursor: pointer; width: 120px; height: 20px; line-height: 18px; background: #666; text-align: center;}
+    #addLayer:hover{color: #ddd; background: #555;}
+    #layerList{width: 120px; height: 380px; display: flex; align-items: center; flex-direction: column-reverse; overflow-y: auto;}
+    .layerList{width: 120px; height: 40px; background: #999; border-top: 1px solid #666; text-align: center; color: #fff;}
+    .previewImageBackground{float: left; width: 60px; height: 40px; background: #555; position: relative;}
+    .previewImage{max-width: 60px; max-height: 40px; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);}
+    .layerList>.active{height: 20px; line-height: 19px; cursor: pointer;}
+    .layerList.view>.viewButton{background: #777;}
+    .layerList>.active:hover{color: #eee;}
+    .layerList.select{background: #ccc; color: #666;}
+    .layerList.select>.active:hover{color: #333;}
+    .layerList.select.view>.viewButton{background: #aaa;}
+
 /* loading page animation */
-@keyframes CircleL{
+@keyframes CircleX{
   0%{transform: translate(-50%, -100%) rotate(180deg);}
   100%{transform: translate(-50%, -100%) rotate(540deg);}
 }

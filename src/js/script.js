@@ -19,29 +19,78 @@ function init() {
   paletteFunction();
   canvasFunction();
   brushToolBarFunction();
-  key();
-  
+  eventListener();
+  canvasZoom();
+
   setTimeout(_ => {
     loading.style.opacity = 0;
     setTimeout(_ => loading.remove(), 500);
   },1000);  
 };
 
-function key() {
+function eventListener() {
+  document.addEventListener("contextmenu", e => {
+    e.preventDefault();
+    return false;
+  });
   document.addEventListener("keydown", e => {
-    // console.log(e.key);
-    // if(e.key === "Control") {
-    //   e.preventDefault();
-    //   return false;
-    // }
+    switch(e.key) {
+      case "Shift" : pressShift = true;break;
+      case "Control" : pressCtrl = true;break;
+      case " " : pressSpace = true;break;
+    }
+    if(penDrawing) {
+      ctx.clearRect(0, 0, $canvas.width, $canvas.height);
+      ctx.drawImage(loadDrawing, 0, 0, $canvas.width, $canvas.height, 0, 0, $canvas.width, $canvas.height);  
+      mouseMovePen();
+    }
   })
-  document.addEventListener("keypress", e => {
-    // console.log(e.key);
-    // if(e.key === "Control") {
-    //   e.preventDefault();
-    //   e.returnValue = false;
-    //   return false;
-    // }
+  document.addEventListener("keydown", e => {
+    if(e.key.toLowerCase() === "z" && pressCtrl && canDrawing) {
+      if(pressShift && !drawing && !penDrawing) {
+        canvasRedo();
+      }
+      if(!pressShift && !drawing && !penDrawing) {
+        canvasUndo();
+      }
+      if(!pressShift && !drawing && penDrawing) {
+        let img = document.createElement("img");
+        img.setAttribute("src", drawingUndoList[drawingUndoList.length - 1].url);
+        drawingLine.splice(-2, 1);
+        img.onload = function() {
+          ctx.filter = `blur(0px)`;
+          ctx.clearRect(0, 0, $canvas.width, $canvas.height);
+          ctx.drawImage(img, 0, 0, $canvas.width, $canvas.height, 0, 0, $canvas.width, $canvas.height);
+          ctx.filter = `blur(${drawingBlur}px)`;
+          ctx.beginPath();
+          if(drawingLine.length <= 1) {
+            penDrawing = false;
+            $toolBar.style.pointerEvents = "";
+            $colorBar.style.pointerEvents = "";
+            $drawingPage.style.pointerEvents = "";
+            return;
+          }
+          for(let i = 0; i < drawingLine.length; i++) {
+            const moveX = drawingLine[i].x;
+            const moveY = drawingLine[i].y;
+            if(i === 0) {
+              ctx.moveTo(moveX, moveY);
+            }else{  
+              ctx.lineTo(moveX, moveY);
+            }
+          }
+          ctx.stroke();
+        }
+      }
+    }
+    if(e.key === "Escape" && drawingStyle === "pen" && penDrawing && canDrawing) drawingPenFinish(true);
+  })
+  document.addEventListener("keyup", e => {
+    switch(e.key) {
+      case "Shift" : pressShift = false;break;
+      case "Control" : pressCtrl = false;break;
+      case " " : pressSpace = false;break;
+    }
   })
   // document.addEventListener("mousewheel", e => {
     // e.preventDefault();

@@ -75,6 +75,10 @@ function brushToolBarFunction() {
       ctx.filter = `blur(0px)`;
       ctx.fillStyle = "#fff";
       ctx.fillRect(0, 0, $canvas.width, $canvas.height);
+      scale = 1;
+      $canvas.style.width = `${$canvas.width}px`;
+      $canvas.style.height = `${$canvas.height}px`;
+      layerPreviewImage[selectCanvas].setAttribute("src", canvas.toDataURL());
     }else if(id === "newProject") {
       $canvasResize.classList.remove("hidden");
       $popBackground.classList.remove("hidden");
@@ -174,21 +178,29 @@ function resize() {
   $newWidth.addEventListener("input", resizePreview);
 
   $canvasCreateButton.addEventListener("click", e => {
-    resizeWidth = Number($newWidth.value);
-    resizeHeight = Number($newHeight.value);
+    if(confirm("새로만들면 기존의 작업물은 사라집니다.")) {
+      resizeWidth = Number($newWidth.value);
+      resizeHeight = Number($newHeight.value);
+  
+      $canvas.width = resizeWidth;
+      $canvas.height = resizeHeight;
+  
+      $canvas.style.width = `${resizeWidth}px`;
+      $canvas.style.height = `${resizeHeight}px`;
+  
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, $canvas.width, $canvas.height);
 
-    $canvas.width = resizeWidth;
-    $canvas.height = resizeHeight;
-
-    $canvas.style.width = `${resizeWidth}px`;
-    $canvas.style.height = `${resizeHeight}px`;
-
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(0, 0, $canvas.width, $canvas.height);
-
-    $canvasResize.classList.add("hidden");
-    $popBackground.classList.add("hidden");
-    canDrawing = true;
+      drawingUndoList = new Array();
+      $undo.classList.remove("active");
+      drawingRedoList = new Array();
+      $redo.classList.remove("active");
+      layerPreviewImage[selectCanvas].setAttribute("src", canvas.toDataURL());
+  
+      $canvasResize.classList.add("hidden");
+      $popBackground.classList.add("hidden");
+      canDrawing = true;
+    }
   })
   $canvasCancleButton.addEventListener("click", e => {
     $canvasResize.classList.add("hidden");
