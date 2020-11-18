@@ -61,10 +61,11 @@
 
   #drawingPage{width: 100%; height: 100%; position: absolute; z-index: 200; left: 50%; top: 50%; transform: translate(-50%, -50%); border: 2px solid #777;}
   #canvasPage{width: 100%; height: 100%; position: absolute; overflow: auto; left: 50%; top: 50%; transform: translate(-50%, -50%);}
-  #canvas.center{position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);}
-  #canvas.leftCenter{position: absolute; left: 50%; transform: translate(-50%, 0);}
-  #canvas.topCenter{position: absolute; top: 50%; transform: translate(0, -50%);}
-  #canvasZoomScale{position: absolute; z-index: 200; background: #aaa; left: 0; top: 0; border: 2px solid #777; border-left: 0px; border-top: 0px; border-radius: 0 0 5px 0; display: block; width: 45px; text-align: center; pointer-events: none; opacity: 0;}
+  .layer{position: absolute;}
+  .layer.center{left: 50%; top: 50%; transform: translate(-50%, -50%);}
+  .layer.leftCenter{left: 50%; transform: translate(-50%, 0);}
+  .layer.topCenter{top: 50%; transform: translate(0, -50%);}
+  #canvasZoomScale{position: absolute; z-index: 200; background: #aaa; left: 0; top: 0; border: 2px solid #777; border-left: 0px; border-top: 0px; border-radius: 0 0 5px 0; display: block; width: 45px; text-align: center; pointer-events: none; opacity: 0; transition: .5s .5s;}
 
   #toolBar{width: 200px; height: 55%; position: absolute; left: -200px; top: 50%; transform: translateY(-50%);background: #777; z-index: 200; border-radius: 2px; border: 2px solid #555; border-left: 0; transition: 0.5s;}
     #toolBar.toggle{left: 0;}

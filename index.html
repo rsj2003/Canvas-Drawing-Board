@@ -18,7 +18,7 @@
     <div id="drawingPage">
       <span id="canvasZoomScale">1</span>
       <div id="canvasPage">
-        <canvas id="canvas" class="backgroundPattern" data-layer="0"></canvas>
+        <canvas id="canvas" class="backgroundPattern layer" data-layer="0"></canvas>
       </div>
     </div>
     <div id="popBackground" class="hidden">
@@ -107,8 +107,8 @@
         <div id="layerTool">
           <div id="layerList">
             <div class="layerList view lock select" data-layer="0">
-              <div class="previewImageBackground">
-                <img src="" alt="" class="previewImage" data-layer="0">
+              <div class="previewImageBackground" data-layer="0">
+                <img src="" class="previewImage">
               </div>
               <p class="viewButton active">view</p>
             </div>
@@ -132,11 +132,11 @@
       </div>
     </div>
   </div>
-  <script src="./src/js/canvasZoom.js"></script>
   <script src="./src/js/palette.js"></script>
   <script src="./src/js/drawingCanvas.js"></script>
   <script src="./src/js/toolBar.js"></script>
   <script src="./src/js/floodFill.js"></script>
+  <script src="./src/js/canvasZoom.js"></script>
   <script src="./src/js/script.js"></script>
 </body>
 </html>

@@ -1,5 +1,6 @@
 const $page = document.getElementById("page");
 const $popBackground = document.getElementById("popBackground");
+const lockKey = [16,17,18,32,33,34,35,36,37,38,39,40,45,46,112,113,114,115,116,117,118,119,120,121,122,123];
 let x = 0;
 let oldX = 0;
 let y = 0;
@@ -21,6 +22,8 @@ function init() {
   brushToolBarFunction();
   eventListener();
   canvasZoom();
+  pageMouseMoveEvent();
+  layerFunction();
 
   setTimeout(_ => {
     loading.style.opacity = 0;
@@ -34,11 +37,13 @@ function eventListener() {
     return false;
   });
   document.addEventListener("keydown", e => {
+    if(lockKey.indexOf(e.keyCode) > -1) e.preventDefault();
     switch(e.key) {
       case "Shift" : pressShift = true;break;
       case "Control" : pressCtrl = true;break;
       case " " : pressSpace = true;break;
     }
+    pageMouseMove();
     if(penDrawing) {
       ctx.clearRect(0, 0, $canvas.width, $canvas.height);
       ctx.drawImage(loadDrawing, 0, 0, $canvas.width, $canvas.height, 0, 0, $canvas.width, $canvas.height);  
@@ -91,6 +96,7 @@ function eventListener() {
       case "Control" : pressCtrl = false;break;
       case " " : pressSpace = false;break;
     }
+    pageMouseMove();
   })
   // document.addEventListener("mousewheel", e => {
     // e.preventDefault();

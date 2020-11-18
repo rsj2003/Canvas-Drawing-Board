@@ -3,6 +3,8 @@ const $canvasPage = document.getElementById("canvasPage");
 const $drawingPage = document.getElementById("drawingPage");
 const $undo = document.getElementById("undo");
 const $redo = document.getElementById("redo");
+const $addLayer = document.getElementById("addLayer");
+const $layerList = document.getElementById("layerList");
 let $canvas = document.getElementById("canvas");
 let ctx = $canvas.getContext("2d");
 let drawing = false;
@@ -20,6 +22,12 @@ let penDrawing = false;
 let canDrawing = true;
 let selectCanvas = 0;
 let layerPreviewImage = document.querySelectorAll(".previewImage");
+let canvasViewButton = document.querySelectorAll(".viewButton");
+let previewImageBackground = document.querySelectorAll(".previewImageBackground");
+let layerCanvas = document.querySelectorAll(".layer");
+let layerImage = new Array();
+let selectLayer = document.querySelector(".layerList.select");
+let newLayerIdx = 1;
 
 // canvas drawing
 function canvasFunction() {
@@ -37,7 +45,7 @@ function canvasFunction() {
 
   ctx.fillStyle = "#fff";
   ctx.fillRect(0, 0, $canvas.width, $canvas.height);
-  layerPreviewImage[selectCanvas].setAttribute("src", canvas.toDataURL());
+  layerPreviewImage[selectCanvas].setAttribute("src", $canvas.toDataURL());
 
   document.addEventListener("click", e => {
     if(e.target === $undo) {
@@ -46,9 +54,9 @@ function canvasFunction() {
     if(e.target === $redo) {
       canvasRedo();
     }
-    if(e.target === $canvas && drawingStyle === "floodFill" && canDrawing) {
+    if(hasClass(e.target, "layer") && drawingStyle === "floodFill" && canDrawing && hasClass(selectLayer, "view")) {
       addPaletteHistory();
-      drawingUndoList.push({url: canvas.toDataURL(), idx: selectCanvas});
+      drawingUndoList.push({url: $canvas.toDataURL(), idx: selectCanvas});
       drawingRedoList = [];
       $redo.classList.remove("active");
       $undo.classList.add("active");
@@ -66,10 +74,10 @@ function canvasFunction() {
       if(styleColor.r !== floodStartColor.r || styleColor.g !== floodStartColor.g || styleColor.b !== floodStartColor.b || styleColor.a !== floodStartColor.a){
         floodFill(pageX, pageY, styleColor);
       }
-      layerPreviewImage[selectCanvas].setAttribute("src", canvas.toDataURL());
+      layerPreviewImage[selectCanvas].setAttribute("src", $canvas.toDataURL());
     }
-    if(drawingStyle === "pen" && canDrawing) {
-      if(e.target === $canvas &&!penDrawing) {
+    if(drawingStyle === "pen" && canDrawing && hasClass(selectLayer, "view")) {
+      if(hasClass(e.target, "layer") &&!penDrawing) {
         penDrawing = true;
         brushReset(e);
         drawingLine = [{x: e.offsetX / scale, y: e.offsetY / scale}, {x: e.offsetX / scale, y: e.offsetY / scale}];
@@ -83,7 +91,7 @@ function canvasFunction() {
   });
 
   document.addEventListener("dblclick", e => {
-    if(drawingStyle === "pen" && penDrawing && canDrawing) drawingPenFinish(false);
+    if(drawingStyle === "pen" && penDrawing && canDrawing && hasClass(selectLayer, "view")) drawingPenFinish(false);
   })
 
   document.addEventListener("mousewheel", e => {
@@ -92,7 +100,7 @@ function canvasFunction() {
 
   document.addEventListener("mousedown", e => {
     if(e.button === 0) {
-      if(e.target === $canvas && drawingStyle !== "floodFill" && drawingStyle !== "pen" && canDrawing) {
+      if(hasClass(e.target, "layer") && drawingStyle !== "floodFill" && drawingStyle !== "pen" && canDrawing && hasClass(selectLayer, "view")) {
         drawing = true;
         brushReset(e);
         drawingRedoList = [];
@@ -103,19 +111,19 @@ function canvasFunction() {
           ctx.arc(e.offsetX / scale, e.offsetY / scale, drawingSize / 2, 0, Math.PI * 2, false);
           ctx.fill();
         };
-        if(drawingStyle === "line" || drawingStyle === "eraser" && canDrawing) {
+        if(drawingStyle === "line" || drawingStyle === "eraser" && canDrawing && hasClass(selectLayer, "view")) {
           drawingLine = [{x: e.offsetX / scale, y: e.offsetY / scale}];
           ctx.moveTo(e.offsetX / scale, e.offsetY / scale);
           ctx.stroke();
         };
       };
     }else if(e.button === 2) {
-      if(drawingStyle === "pen" && penDrawing && canDrawing) drawingPenFinish(true);
+      if(drawingStyle === "pen" && penDrawing && canDrawing && hasClass(selectLayer, "view")) drawingPenFinish(true);
     }
   });
 
   document.addEventListener("mousemove", e => {
-    if((drawing || penDrawing) && e.target === $page && canDrawing) {
+    if((drawing || penDrawing) && e.target === $page && canDrawing && hasClass(selectLayer, "view")) {
       let mouseX = (e.offsetX - pageX) / scale;
       let mouseY = (e.offsetY - pageY) / scale;
       if(drawingStyle === "pixel") ctx.fillRect(mouseX - (drawingSize / 2), mouseY - (drawingSize / 2), drawingSize, drawingSize);
@@ -149,24 +157,32 @@ function canvasFunction() {
   });
 
   document.addEventListener("mouseup", e => {
-    if(drawing && canDrawing) canvasMouseUp(e);
+    if(drawing && canDrawing && hasClass(selectLayer, "view")) canvasMouseUp(e);
   });
 
   let maxWidth = $canvasPage.style.width.replace(/%/gi, "") * window.innerWidth / 100;
   let maxHeight = $canvasPage.style.height.replace(/%/gi, "") * window.innerHeight / 100;
   let width = Number($canvas.style.width.replace(/px/gi, ""));
   let height = Number($canvas.style.height.replace(/px/gi, ""));
-  if(maxWidth < width || maxHeight < height) {
-    $canvas.classList.remove("center");
-    $canvasPage.scrollTo((width - maxWidth) / 2, (height - maxHeight) / 2);
-    return;
+  if(maxWidth >= width && maxHeight >= height) {
+    $canvas.classList.add("center");
   }
-  $canvas.classList.add("center");
+  if(maxWidth < width && maxHeight >= height) {
+    $canvas.classList.add("topCenter");
+  }
+  if(maxWidth >= width && maxHeight < height) {
+    $canvas.classList.add("leftCenter");
+  }
+  // if(maxWidth < width || maxHeight < height) {
+  //   $canvas.classList.remove("center");
+  //   $canvasPage.scrollTo((width - maxWidth) / 2, (height - maxHeight) / 2);
+  //   return;
+  // }
 }
 
 function brushReset(e) {
   if(drawingStyle !== "eraser") addPaletteHistory();
-  drawingUndoList.push({url: canvas.toDataURL(), idx: selectCanvas});
+  drawingUndoList.push({url: $canvas.toDataURL(), idx: selectCanvas});
   pageX = e.pageX - e.offsetX;
   pageY = e.pageY - e.offsetY;
   $toolBar.style.pointerEvents = "none";
@@ -222,7 +238,7 @@ function canvasMouseUp(e) {
     $undo.classList.add("active");
     drawing = false;
     ctx.beginPath();
-    layerPreviewImage[selectCanvas].setAttribute("src", canvas.toDataURL());
+    layerPreviewImage[selectCanvas].setAttribute("src", $canvas.toDataURL());
   }
 }
 
@@ -266,18 +282,19 @@ function drawingPenFinish(final) {
     penDrawing = false;
     ctx.beginPath();
   }
-  layerPreviewImage[selectCanvas].setAttribute("src", canvas.toDataURL());
+  layerPreviewImage[selectCanvas].setAttribute("src", $canvas.toDataURL());
 }
 
 function canvasUndo() {
   if(drawingUndoList.length > 0) {
-    drawingRedoList.push({url: canvas.toDataURL(), idx: selectCanvas});
+    drawingRedoList.push({url: $canvas.toDataURL(), idx: selectCanvas});
     $redo.classList.add("active");
     loadDrawing.setAttribute("src", drawingUndoList[drawingUndoList.length - 1].url);
     loadDrawing.onload = function() {
       ctx.filter = `blur(0px)`;
       ctx.clearRect(0, 0, $canvas.width, $canvas.height);
       ctx.drawImage(loadDrawing, 0, 0, $canvas.width, $canvas.height, 0, 0, $canvas.width, $canvas.height);  
+      layerPreviewImage[selectCanvas].setAttribute("src", $canvas.toDataURL());
     }
     drawingUndoList.pop();
   }
@@ -286,13 +303,14 @@ function canvasUndo() {
 
 function canvasRedo() {
   if(drawingRedoList.length > 0) {
-    drawingUndoList.push({url: canvas.toDataURL(), idx: selectCanvas});
+    drawingUndoList.push({url: $canvas.toDataURL(), idx: selectCanvas});
     $undo.classList.add("active");
     loadDrawing.setAttribute("src", drawingRedoList[drawingRedoList.length - 1].url);
     loadDrawing.onload = function() {
       ctx.filter = `blur(0px)`;
       ctx.clearRect(0, 0, $canvas.width, $canvas.height);
       ctx.drawImage(loadDrawing, 0, 0, $canvas.width, $canvas.height, 0, 0, $canvas.width, $canvas.height);
+      layerPreviewImage[selectCanvas].setAttribute("src", $canvas.toDataURL());
     }
     drawingRedoList.pop();
   }
@@ -328,4 +346,155 @@ function mouseMovePen(mouse = drawingLine[drawingLine.length - 1]) {
     ctx.lineTo(i.x, i.y);
   })
   ctx.stroke();
+}
+
+function layerFunction() {
+  canvasViewButton.forEach(i => i.addEventListener("click", e => {
+    viewButtonClickEvent(e);
+  }));
+
+  previewImageBackground.forEach(i => i.addEventListener("click", e => {
+    previewImageBackgroundClickEvent(e);
+  }));
+
+  $addLayer.addEventListener("click", e => {
+    let layerList = document.createElement("div");
+    let previewImageBackground = document.createElement("div");
+    let previewImage = document.createElement("img");
+    let viewButton = document.createElement("p");
+    let deleteButton = document.createElement("p");
+    let canvas = document.createElement("canvas");
+
+    layerList.classList.add("layerList");
+    layerList.classList.add("view");
+    layerList.classList.add("select");
+    
+    if(hasClass($canvas, "center")) {
+      canvas.classList.add("center");
+    }
+    if(hasClass($canvas, "topCenter")) {
+      canvas.classList.add("topCenter");
+    }
+    if(hasClass($canvas, "leftCenter")) {
+      canvas.classList.add("leftCenter");
+    }
+
+    previewImage.setAttribute("src", "");
+
+    previewImageBackground.classList.add("previewImageBackground");
+    previewImage.classList.add("previewImage");
+
+    viewButton.classList.add("viewButton");
+    viewButton.classList.add("active");
+    deleteButton.classList.add("deleteButton");
+    deleteButton.classList.add("active");
+
+    viewButton.innerHTML = "view";
+    deleteButton.innerHTML = "delete";
+    previewImageBackground.dataset.layer = newLayerIdx;
+    layerList.dataset.layer = newLayerIdx;
+
+    layerList.addEventListener("mousedown", e => {
+      if(pressSpace) {
+        pageMoving = true;
+        $canvasPage.style.cursor = "grabbing";
+        $page.style.cursor = "grabbing";
+        moveStartX = e.pageX;
+        moveStartY = e.pageY;
+        moveStartScrollX = $canvasPage.scrollLeft;
+        moveStartScrollY = $canvasPage.scrollTop;
+      }
+    })
+    viewButton.addEventListener("click", e => {
+      viewButtonClickEvent(e);
+    })
+    previewImageBackground.addEventListener("click", e => {
+      previewImageBackgroundClickEvent(e);
+    })
+
+
+    previewImageBackground.append(previewImage);
+    layerList.append(previewImageBackground, viewButton, deleteButton);
+
+    $layerList.append(layerList);
+    
+
+    canvas.classList.add("layer");
+    canvas.dataset.layer = newLayerIdx;
+
+    selectLayer.classList.remove("select");
+    selectLayer = layerList;
+
+    $canvasPage.append(canvas);
+    $canvas = canvas;
+    ctx = $canvas.getContext("2d");
+    selectCanvas = newLayerIdx;
+
+    layerPreviewImage = document.querySelectorAll(".previewImage");
+    previewImageBackground = document.querySelectorAll(".previewImageBackground");
+    canvasViewButton = document.querySelectorAll(".viewButton");
+    layerCanvas = document.querySelectorAll(".layer");
+
+    $canvas.width = normalSize.width;
+    $canvas.height = normalSize.height;
+
+    $canvas.style.width = `${normalSize.width * scale}px`;
+    $canvas.style.height = `${normalSize.height * scale}px`;
+
+    newLayerIdx++;
+  })
+}
+
+function viewButtonClickEvent(e) {
+  let layerList = e.target.closest(".layerList");
+  let select = $canvas;
+  layerList.classList.toggle("view");
+  layerCanvas.forEach(i => {
+    if(i.dataset.layer === layerList.dataset.layer) {
+      $canvas = i;
+      ctx = $canvas.getContext("2d");
+      return false;
+    }
+  })
+  if(hasClass(layerList, "view")) {
+    let i = 0;
+    while((layerImage[i].idx !== layerList.dataset.layer) && i < layerImage.length) i++;
+    loadDrawing.setAttribute("src", layerImage[i].url);
+    ctx.drawImage(loadDrawing, 0, 0, $canvas.width, $canvas.height, 0, 0, $canvas.width, $canvas.height);  
+  }else {
+    if(layerImage.length > 0) {
+      let i = 0;
+      while(i < layerImage.length && (layerImage[i].idx !== layerList.dataset.layer)) i++;
+      if(i < layerImage.length && layerImage[i].idx === layerList.dataset.layer) {
+        layerImage[i] = {url: $canvas.toDataURL(), idx: layerList.dataset.layer};
+      }else {
+        layerImage.push({url: $canvas.toDataURL(), idx: layerList.dataset.layer})
+      }
+    }else {
+      layerImage.push({url: $canvas.toDataURL(), idx: layerList.dataset.layer})
+    }
+    ctx.clearRect(0, 0, $canvas.width, $canvas.height);
+  }
+  $canvas = select;
+  ctx = $canvas.getContext("2d");
+}
+
+function previewImageBackgroundClickEvent(e) {
+  let target = e.target
+  if(!hasClass(target, "previewImageBackground")) target = target.closest(".previewImageBackground");
+  selectLayer.classList.remove("select");
+  selectLayer = target.closest(".layerList");
+  selectLayer.classList.add("select");
+  
+  layerCanvas.forEach(i => {
+    if(i.dataset.layer === layerList.dataset.layer) {
+      $canvas = i;
+      ctx = $canvas.getContext("2d");
+      return false;
+    }
+  })
+
+  $canvas = canvas;
+  ctx = $canvas.getContext("2d");
+  selectCanvas = Number(target.dataset.layer);
 }
