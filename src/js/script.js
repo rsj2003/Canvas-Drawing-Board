@@ -38,10 +38,10 @@ function eventListener() {
   });
   document.addEventListener("keydown", e => {
     if(lockKey.indexOf(e.keyCode) > -1) e.preventDefault();
-    switch(e.key) {
-      case "Shift" : pressShift = true;break;
-      case "Control" : pressCtrl = true;break;
-      case " " : pressSpace = true;break;
+    switch(e.key.toLowerCase()) {
+      case "shift" : pressShift = true; break;
+      case "control" : pressCtrl = true; break;
+      case " " : pressSpace = true; break;
     }
     pageMouseMove();
     if(penDrawing) {
@@ -91,10 +91,11 @@ function eventListener() {
     if(e.key === "Escape" && drawingStyle === "pen" && penDrawing && canDrawing) drawingPenFinish(true);
   })
   document.addEventListener("keyup", e => {
-    switch(e.key) {
-      case "Shift" : pressShift = false;break;
-      case "Control" : pressCtrl = false;break;
-      case " " : pressSpace = false;break;
+    switch(e.key.toLowerCase()) {
+      case "shift" : pressShift = false; break;
+      case "control" : pressCtrl = false; break;
+      case " " : pressSpace = false; break;
+      case "z" : drawingRecord = false; break;
     }
     pageMouseMove();
   })

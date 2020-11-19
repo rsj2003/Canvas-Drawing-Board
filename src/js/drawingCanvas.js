@@ -28,6 +28,7 @@ let layerListList = document.querySelectorAll(".layerList");
 let layerImage = new Array();
 let selectLayer = document.querySelector(".layerList.select");
 let newLayerIdx = 1;
+let drawingRecord = false;
 
 // canvas drawing
 function canvasFunction() {
@@ -287,8 +288,12 @@ function drawingPenFinish(final) {
 
 function canvasUndo() {
   let record = drawingUndoList[drawingUndoList.length - 1];
-  if(drawingUndoList.length > 0) {
-    if(record.create === 0 || record.create === 1) layerSelect(record.idx);
+  if(drawingUndoList.length > 0 && !drawingRecord) {
+    drawingRecord = true;
+    if(record.create === 0 || record.create === 1) {
+      layerSelect(record.idx);
+      classViewAdd();
+    }
     drawingRedoList.push({url: $canvas.toDataURL(), idx: record.idx, create: record.create});
     $redo.classList.add("active");
     if(record.create === 0) {
@@ -302,7 +307,7 @@ function canvasUndo() {
     }
     if(record.create === 1) {
       removeRecordLayer(record.idx);
-      layerSelect(drawingUndoList[drawingUndoList.length - 2].idx);
+      layerSelect(0);
     }
     if(record.create === 2) {
       createRecordLayer(record.idx);
@@ -322,8 +327,12 @@ function canvasUndo() {
 
 function canvasRedo() {
   let record = drawingRedoList[drawingRedoList.length - 1];
-  if(drawingRedoList.length > 0) {
-    if(record.create === 0 || record.create === 2) layerSelect(record.idx);
+  if(drawingRedoList.length > 0 && !drawingRecord) {
+    drawingRecord = true;
+    if(record.create === 0 || record.create === 2) {
+      layerSelect(record.idx);
+      classViewAdd();
+    }
     drawingUndoList.push({url: $canvas.toDataURL(), idx: record.idx, create: record.create});
     $undo.classList.add("active");
     if(record.create === 0) {
@@ -347,7 +356,7 @@ function canvasRedo() {
     }
     if(record.create === 2) {
       removeRecordLayer(record.idx);
-      layerSelect(drawingUndoList[drawingUndoList.length - 2].idx);
+      layerSelect(0);
     }
     drawingRedoList.pop();
   }
@@ -406,12 +415,14 @@ function layerFunction() {
 function viewButtonClickEvent(e) {
   let layerList = e.target.closest(".layerList");
   let select = $canvas;
+  let selectSelectCanvas = selectCanvas;
   layerList.classList.toggle("view");
   layerCanvasList.forEach(i => {
     if(i.dataset.layer === layerList.dataset.layer) {
       $canvas = i;
       ctx = $canvas.getContext("2d");
-      return false;
+      selectCanvas.idx = i.dataset.layer;
+      selectCanvas.element = layerList.querySelector(".previewImage");
     }
   })
   if(hasClass(layerList, "view")) {
@@ -435,6 +446,7 @@ function viewButtonClickEvent(e) {
   }
   $canvas = select;
   ctx = $canvas.getContext("2d");
+  selectCanvas = selectSelectCanvas;
 }
 
 function deleteButtonClickEvent(e) {
@@ -587,4 +599,15 @@ function layerSelect(idx) {
   
   selectCanvas.idx = Number(layerList.dataset.layer);
   selectCanvas.element = layerList.querySelector(".previewImage");
+}
+
+function classViewAdd() {
+  let layerList = selectCanvas.element.closest(".layerList")
+  if(!hasClass(layerList, "view")) {
+    layerList.classList.add("view");
+    let i = 0;
+    while((layerImage[i].idx !== layerList.dataset.layer) && i < layerImage.length) i++;
+    loadDrawing.setAttribute("src", layerImage[i].url);
+    ctx.drawImage(loadDrawing, 0, 0, $canvas.width, $canvas.height, 0, 0, $canvas.width, $canvas.height);
+  }
 }
