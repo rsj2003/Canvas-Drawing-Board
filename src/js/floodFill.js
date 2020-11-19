@@ -70,5 +70,5 @@ function floodFill(startX, startY, fillColor) {
       posIdx += $canvas.width * 4;
     }
   }
-  ctx.putImageData(dstImage, 0,   0);
+  ctx.putImageData(dstImage, 0, 0);
 };

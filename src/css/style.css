@@ -111,6 +111,13 @@
     .layerList.select>.active:hover{color: #333;}
     .layerList.select.view>.viewButton{background: #aaa;}
 
+  #exportPage{position: absolute; left: 50%; top: 50%; max-width: 100vw; max-height: 100vh; transform: translate(-50%, -50%); background: #555; z-index: 50000;}
+    #exportCanvas{margin: 10px 10px 0; max-width: (100vw - 20px); max-height: calc(100vh - 60px); overflow: auto;}
+    #exportButton{height: 30px; margin: 10px; float: right;}
+    #exportButton>button{width: 75px; height: 30px; box-sizing: border-box; cursor: pointer;}
+    #exportImage{display: none;}
+
+
 /* loading page animation */
 @keyframes CircleX{
   0%{transform: translate(-50%, -100%) rotate(180deg);}

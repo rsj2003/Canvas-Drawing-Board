@@ -103,6 +103,7 @@
           <button id="floodFill" class="toolBarButton active">flood fill</button>
           <button id="clear" class="toolBarButton active">clear</button>
           <button id="newProject" class="toolBarButton active">new project</button>
+          <button id="exportProject" class="toolBarButton active">export</button>
         </div>
         <div id="layerTool">
           <div id="layerList">
@@ -112,23 +113,19 @@
               </div>
               <p class="viewButton active">view</p>
             </div>
-            <!-- <div class="layerList view" data-layer="1">
-              <div class="previewImageBackground">
-                <img src="" alt="" class="previewImage" data-layer="1">
-              </div>
-              <p class="viewButton active">view</p>
-              <p class="deleteButton active">delete</p>
-            </div> -->
-            <!-- <div class="layerList view">
-              <div class="previewImageBackground">
-                <img src="" alt="" class="previewImage">
-              </div>
-              <p class="viewButton active">view</p>
-              <p class="deleteButton active">delete</p>
-            </div> -->
           </div>
           <div id="addLayer">add layer</div>
         </div>
+      </div>
+    </div>
+    <div id="exportPage" class="hidden">
+      <div id="exportCanvas">
+        <canvas id="export" class="backgroundPattern"></canvas>
+        <img id="exportImage" src="">
+      </div>
+      <div id="exportButton">
+        <button id="exportDownload">download</button>
+        <button id="exportCancle">cancle</button>
       </div>
     </div>
   </div>

@@ -31,6 +31,12 @@ const $canvasCreateButton = document.getElementById("create");
 const $canvasCancleButton = document.getElementById("cancle");
 let resizeWidth = 1200;
 let resizeHeight = 600;
+// export
+const $exportPage = document.getElementById("exportPage");
+const $export = document.getElementById("export");
+const $exportDownload = document.getElementById("exportDownload");
+const $exportCancle = document.getElementById("exportCancle");
+const $exportImage = document.getElementById("exportImage");
 
 function addPaletteHistory() {
   if(paletteHistory.indexOf($color.value) > -1) paletteHistory.splice(paletteHistory.indexOf($color.value), 1);
@@ -57,7 +63,7 @@ function brushToolBarFunction() {
 
   $brushButton.querySelectorAll("button").forEach(i => i.addEventListener("click", e => {
     let id = e.target.id
-    if(id !== "clear" && id !== "newProject") {
+    if(id !== "clear" && id !== "newProject" && id !== "exportProject") {
       if(id.indexOf("Round") > -1) {
         strokeStyle = "round";
         id = id.replace(/Round/gi, "");
@@ -66,9 +72,10 @@ function brushToolBarFunction() {
       }
       $brushButton.querySelector(".select").classList.remove("select");
       e.target.classList.add("select");
+      drawingStyle = id;
     }
     if(id === "clear") {
-      drawingUndoList.push($canvas.toDataURL());
+      drawingUndoList.push({url: $canvas.toDataURL(), idx: selectCanvas.idx, create: 0});
       drawingRedoList = [];
       $redo.classList.remove("active");
       $undo.classList.add("active");
@@ -84,8 +91,15 @@ function brushToolBarFunction() {
       $canvasResize.classList.remove("hidden");
       $popBackground.classList.remove("hidden");
       canDrawing = false;
-    }else {
-      drawingStyle = id;
+    }else if(id === "exportProject") {
+      $exportPage.classList.remove("hidden");
+      $export.width = normalSize.width;
+      $export.height = normalSize.height;
+      let exportCtx = $export.getContext("2d");
+      layerCanvasList.forEach(i => {
+        $exportImage.setAttribute("src", i.toDataURL());
+        exportCtx.drawImage($exportImage, 0, 0, $export.width, $export.height, 0, 0, $export.width, $export.height);
+      })
     }
     brushPreview();
     // if(id ==="floodFill") {
@@ -126,6 +140,22 @@ function brushToolBarFunction() {
     }
     brushPreview();
   }))
+
+  $exportDownload.addEventListener("click", e => {
+    let exportURL = $export.toDataURL("image/png");
+    exportURL = exportURL.replace(/^data:image\/[^;]*/, 'data:application/octet-stream');
+    exportURL = exportURL.replace(/^data:application\/octet-stream/, 'data:application/octet-stream;headers=Content-Disposition%3A%20attachment%3B%20filename=Canvas.png');
+
+    var aTag = document.createElement('a');
+    aTag.download = 'Drawing_board.png';
+    aTag.href = exportURL;
+    aTag.click();
+    $exportPage.classList.add("hidden");
+  })
+
+  $exportCancle.addEventListener("click", e => {
+    $exportPage.classList.add("hidden");
+  })
 }
 
 function brushPreview() {
@@ -182,7 +212,37 @@ function resize() {
     if(confirm("새로만들면 기존의 작업물은 사라집니다.")) {
       resizeWidth = Number($newWidth.value);
       resizeHeight = Number($newHeight.value);
-  
+      
+      $layerList.innerHTML = `
+      <div class="layerList view lock select" data-layer="0">
+        <div class="previewImageBackground" data-layer="0">
+          <img src="" class="previewImage">
+        </div>
+        <p class="viewButton active">view</p>
+      </div>
+      `;
+      selectCanvas = {element: document.querySelector(".layerList.select .previewImage"), idx: 0};
+      
+      $canvasPage.innerHTML = `
+      <canvas id="canvas" class="backgroundPattern layer" data-layer="0"></canvas>
+      `;
+      $canvas = document.getElementById("canvas");
+      ctx = $canvas.getContext("2d");
+
+      selectLayer = document.querySelector(".layerList.select");
+      previewImageBackgroundList = document.querySelectorAll(".previewImageBackground");
+      canvasViewButtonList = document.querySelectorAll(".viewButton");
+      layerCanvasList = document.querySelectorAll(".layer");
+      layerListList = document.querySelectorAll(".layerList");
+
+      canvasViewButtonList.forEach(i => i.addEventListener("click", e => {
+        viewButtonClickEvent(e);
+      }));
+    
+      previewImageBackgroundList.forEach(i => i.addEventListener("click", e => {
+        layerSelect(e.target.dataset.layer);
+      }));
+
       $canvas.width = resizeWidth;
       $canvas.height = resizeHeight;
   
@@ -191,12 +251,14 @@ function resize() {
   
       ctx.fillStyle = "#fff";
       ctx.fillRect(0, 0, $canvas.width, $canvas.height);
-
+      
       drawingUndoList = new Array();
       $undo.classList.remove("active");
       drawingRedoList = new Array();
       $redo.classList.remove("active");
       selectCanvas.element.setAttribute("src", $canvas.toDataURL());
+      newLayerIdx = 1;
+      layerImage = new Array();
       
       scale = 1;
       normalSize = {width: resizeWidth, height: resizeHeight};
