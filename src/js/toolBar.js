@@ -68,14 +68,18 @@ function brushToolBarFunction() {
       e.target.classList.add("select");
     }
     if(id === "clear") {
-      drawingUndoList.push(canvas.toDataURL());
+      drawingUndoList.push($canvas.toDataURL());
       drawingRedoList = [];
       $redo.classList.remove("active");
       $undo.classList.add("active");
       ctx.filter = `blur(0px)`;
-      ctx.fillStyle = "#fff";
-      ctx.fillRect(0, 0, $canvas.width, $canvas.height);
-      layerPreviewImage[selectCanvas].setAttribute("src", canvas.toDataURL());
+      if(selectCanvas.idx === 0) {
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, $canvas.width, $canvas.height);
+      }else {
+        ctx.clearRect(0, 0, $canvas.width, $canvas.height);
+      }
+      selectCanvas.element.setAttribute("src", $canvas.toDataURL());
     }else if(id === "newProject") {
       $canvasResize.classList.remove("hidden");
       $popBackground.classList.remove("hidden");
@@ -192,7 +196,7 @@ function resize() {
       $undo.classList.remove("active");
       drawingRedoList = new Array();
       $redo.classList.remove("active");
-      layerPreviewImage[selectCanvas].setAttribute("src", canvas.toDataURL());
+      selectCanvas.element.setAttribute("src", $canvas.toDataURL());
       
       scale = 1;
       normalSize = {width: resizeWidth, height: resizeHeight};

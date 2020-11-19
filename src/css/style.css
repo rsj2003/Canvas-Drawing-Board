@@ -103,7 +103,7 @@
     #layerList{width: 120px; height: 380px; display: flex; align-items: center; flex-direction: column-reverse; overflow-y: auto;}
     .layerList{width: 120px; height: 40px; background: #999; border-top: 1px solid #666; text-align: center; color: #fff;}
     .previewImageBackground{float: left; width: 60px; height: 40px; background: #555; position: relative;}
-    .previewImage{max-width: 60px; max-height: 40px; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);}
+    .previewImage{max-width: 60px; max-height: 40px; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: none;}
     .layerList>.active{height: 20px; line-height: 19px; cursor: pointer;}
     .layerList.view>.viewButton{background: #777;}
     .layerList>.active:hover{color: #eee;}

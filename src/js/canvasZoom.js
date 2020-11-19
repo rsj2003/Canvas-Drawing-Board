@@ -25,8 +25,8 @@ function canvasZoom() {
       // console.log(e.pageX);
     }
     if(scale < 0.05) scale = 0.05;
-    layerCanvas.forEach(i => i.style.width = `${normalSize.width * scale}px`);
-    layerCanvas.forEach(i => i.style.height = `${normalSize.height * scale}px`);
+    layerCanvasList.forEach(i => i.style.width = `${normalSize.width * scale}px`);
+    layerCanvasList.forEach(i => i.style.height = `${normalSize.height * scale}px`);
     $canvasZoomScale.innerHTML = scale;
     $canvasZoomScale.style.transition = "0s";
     $canvasZoomScale.style.opacity = 1;
@@ -37,21 +37,21 @@ function canvasZoom() {
 
     width = Number($canvas.style.width.replace(/px/gi, ""));
     height = Number($canvas.style.height.replace(/px/gi, ""));
-    layerCanvas.forEach(i => i.classList.remove("center"));
-    layerCanvas.forEach(i => i.classList.remove("leftCenter"));
-    layerCanvas.forEach(i => i.classList.remove("topCenter"));
+    layerCanvasList.forEach(i => i.classList.remove("center"));
+    layerCanvasList.forEach(i => i.classList.remove("leftCenter"));
+    layerCanvasList.forEach(i => i.classList.remove("topCenter"));
     if(maxWidth >= width && maxHeight >= height) {
-      layerCanvas.forEach(i => i.classList.add("center"));
+      layerCanvasList.forEach(i => i.classList.add("center"));
       return;
     }
     if(maxWidth < width && maxHeight >= height) {
-      layerCanvas.forEach(i => i.classList.add("topCenter"));
+      layerCanvasList.forEach(i => i.classList.add("topCenter"));
       $canvasPage.scrollTo(zoomX, 0);
       console.log($canvasPage.scrollLeft);
       return;
     }
     if(maxWidth >= width && maxHeight < height) {
-      layerCanvas.forEach(i => i.classList.add("leftCenter"));
+      layerCanvasList.forEach(i => i.classList.add("leftCenter"));
       $canvasPage.scrollTo(0, zoomY);
       return;
     }
