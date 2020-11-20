@@ -37,6 +37,11 @@ const $export = document.getElementById("export");
 const $exportDownload = document.getElementById("exportDownload");
 const $exportCancle = document.getElementById("exportCancle");
 const $exportImage = document.getElementById("exportImage");
+const exportCtx = $export.getContext("2d");
+const $mosaicRange = document.getElementById("mosaicRange");
+const $mosaic = document.getElementById("mosaic");
+let mosaicOriginal;
+let oldMosaicSize = 1;
 
 function addPaletteHistory() {
   if(paletteHistory.indexOf($color.value) > -1) paletteHistory.splice(paletteHistory.indexOf($color.value), 1);
@@ -95,11 +100,13 @@ function brushToolBarFunction() {
       $exportPage.classList.remove("hidden");
       $export.width = normalSize.width;
       $export.height = normalSize.height;
-      let exportCtx = $export.getContext("2d");
       layerCanvasList.forEach(i => {
         $exportImage.setAttribute("src", i.toDataURL());
         exportCtx.drawImage($exportImage, 0, 0, $export.width, $export.height, 0, 0, $export.width, $export.height);
       })
+      mosaicOriginal = exportCtx.getImageData(0, 0, $export.width, $export.height);
+      $mosaicRange.value = 1;
+      $mosaic.value = 1;
     }
     brushPreview();
     // if(id ==="floodFill") {
@@ -156,6 +163,89 @@ function brushToolBarFunction() {
   $exportCancle.addEventListener("click", e => {
     $exportPage.classList.add("hidden");
   })
+
+  $mosaic.addEventListener("input", e => {
+    if(e.target.value < 1) e.target.value = 1;
+    if(e.target.value > 100) e.target.value = 100;
+    $mosaicRange.value = e.target.value;
+  })
+  $mosaicRange.addEventListener("input", e => {
+    if(e.target.value < 1) e.target.value = 1;
+    if(e.target.value > 100) e.target.value = 100;
+    $mosaic.value = e.target.value;
+  })
+  document.addEventListener("mouseup", e => {
+    if(oldMosaicSize !== Number($mosaic.value)) {
+      oldMosaicSize = Number($mosaic.value);
+      mosaic();
+    }
+  })
+  $mosaic.addEventListener("keyup", e => {
+    if(oldMosaicSize !== Number($mosaic.value)) {
+      oldMosaicSize = Number($mosaic.value);
+      mosaic();
+    }
+  })
+}
+
+function mosaic() {
+  exportCtx.putImageData(mosaicOriginal, 0, 0);
+  let mosaic = exportCtx.getImageData(0, 0, $export.width, $export.height);
+  let mosaicData = mosaic.data;
+  let mosaicSize = Number($mosaic.value);
+  let r = 0;
+  let g = 0;
+  let b = 0;
+  let a = 0;
+  let idx = 0;
+  let idxY = 1;
+  if(mosaicSize !== 1) {
+    for(let i = 0; i < Math.ceil($export.width / mosaicSize) * Math.ceil($export.height / mosaicSize); i++) {
+      r = 0;
+      g = 0;
+      b = 0;
+      a = 0;
+      let mosaicRList = new Array();
+      let mosaicGList = new Array();
+      let mosaicBList = new Array();
+      let mosaicAList = new Array();
+      for(let x = 0; x < mosaicSize; x++) {
+        if((idx + (x * 4)) / ($export.width * 4) <= idxY) {
+          for(let y = 0; y < mosaicSize; y++) {
+            if((idx + ($export.width * 4 * y) < $export.width * $export.height * 4)) {
+              mosaicRList.push(idx + (x * 4) + ($export.width * 4 * y));
+              mosaicGList.push(idx + (x * 4) + ($export.width * 4 * y) + 1);
+              mosaicBList.push(idx + (x * 4) + ($export.width * 4 * y) + 2);
+              mosaicAList.push(idx + (x * 4) + ($export.width * 4 * y) + 3);
+              r += mosaicData[idx + (x * 4) + ($export.width * 4 * y)];
+              g += mosaicData[idx + (x * 4) + ($export.width * 4 * y) + 1];
+              b += mosaicData[idx + (x * 4) + ($export.width * 4 * y) + 2];
+              a += mosaicData[idx + (x * 4) + ($export.width * 4 * y) + 3];
+            }
+          }
+        }
+      }
+      // if(i > Math.ceil($export.width / mosaicSize) * Math.ceil($export.height / mosaicSize) - 5) console.log(mosaicRList);
+      r = Math.round(r / mosaicRList.length);
+      g = Math.round(g / mosaicGList.length);
+      b = Math.round(b / mosaicBList.length);
+      a = Math.round(a / mosaicAList.length);
+      for(let l = 0; l < mosaicRList.length; l++) {
+        if(i > Math.ceil($export.width / mosaicSize) * Math.ceil($export.height / mosaicSize) - 5) console.log(mosaicRList[l]);
+        mosaicData[mosaicRList[l]] = r;
+        mosaicData[mosaicGList[l]] = g;
+        mosaicData[mosaicBList[l]] = b;
+        mosaicData[mosaicAList[l]] = a;
+      }
+
+      idx += 4 * mosaicSize;
+      if(idx / ($export.width * 4) > idxY) {
+        idx = idx - (idx % ($export.width * 4)) + ($export.width * 4 * (mosaicSize - 1));
+        idxY += mosaicSize;
+      }
+    }
+  }
+  exportCtx.putImageData(mosaic, 0, 0);
 }
 
 function brushPreview() {
