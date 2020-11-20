@@ -200,7 +200,7 @@ function mosaic() {
   let idx = 0;
   let idxY = 1;
   if(mosaicSize !== 1) {
-    for(let i = 0; i < Math.ceil($export.width / mosaicSize) * Math.ceil($export.height / mosaicSize); i++) {
+    for(let i = 0; i <= Math.ceil($export.width / mosaicSize) * Math.ceil($export.height / mosaicSize); i++) {
       r = 0;
       g = 0;
       b = 0;
@@ -210,7 +210,7 @@ function mosaic() {
       let mosaicBList = new Array();
       let mosaicAList = new Array();
       for(let x = 0; x < mosaicSize; x++) {
-        if((idx + (x * 4)) / ($export.width * 4) <= idxY) {
+        if((idx + (x * 4)) / ($export.width * 4) < idxY) {
           for(let y = 0; y < mosaicSize; y++) {
             if((idx + ($export.width * 4 * y) < $export.width * $export.height * 4)) {
               mosaicRList.push(idx + (x * 4) + ($export.width * 4 * y));
@@ -231,15 +231,15 @@ function mosaic() {
       b = Math.round(b / mosaicBList.length);
       a = Math.round(a / mosaicAList.length);
       for(let l = 0; l < mosaicRList.length; l++) {
-        if(i > Math.ceil($export.width / mosaicSize) * Math.ceil($export.height / mosaicSize) - 5) console.log(mosaicRList[l]);
+        // if(i > Math.ceil($export.width / mosaicSize) * Math.ceil($export.height / mosaicSize) - 5) console.log(mosaicRList[l]);
         mosaicData[mosaicRList[l]] = r;
         mosaicData[mosaicGList[l]] = g;
         mosaicData[mosaicBList[l]] = b;
         mosaicData[mosaicAList[l]] = a;
       }
-
+      console.log(idxY);
       idx += 4 * mosaicSize;
-      if(idx / ($export.width * 4) > idxY) {
+      if(idx / ($export.width * 4) >= idxY) {
         idx = idx - (idx % ($export.width * 4)) + ($export.width * 4 * (mosaicSize - 1));
         idxY += mosaicSize;
       }
