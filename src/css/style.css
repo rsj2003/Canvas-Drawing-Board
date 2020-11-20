@@ -92,10 +92,12 @@
     #canvasResize{width: 400px; height: 200px; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 10000; background: #555; color: #fff; padding: 30px; display: flex; justify-content: space-between;}
     .canvasResizeInput{width: 180px; height: 100%; display: flex; justify-content: space-between; align-items: center; flex-direction: column;}
     .canvasResizeInput>div:nth-of-type(1){margin-top: 20px;}
-    .canvasResizeInput>div:nth-of-type(2){margin-bottom: 30px;}
+    .canvasResizeInput>div:nth-of-type(2){margin-bottom: 20px;}
     .canvasResizeInput button{width: 50px; height: 30px; user-select: none;}
     .canvasResizeSize{width: 180px; height: 180px; margin: 9px; border: 1px solid #aaa; position: relative;}
     #canvasResizeSize{background: #fff; width: 60%; height: 30%; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);}
+    #newImage{width: 170px; margin-bottom: 5px;}
+    #newImageImage{display: none;}
 
     #layerTool{width: 120px; height: 400px; background: #444; margin: 0 auto 30px;}
     #addLayer{color: #fff; cursor: pointer; width: 120px; height: 20px; line-height: 18px; background: #666; text-align: center;}

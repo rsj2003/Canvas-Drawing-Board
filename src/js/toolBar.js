@@ -29,6 +29,8 @@ const $canvasResize = document.getElementById("canvasResize");
 const $canvasResizeSize = document.getElementById("canvasResizeSize");
 const $canvasCreateButton = document.getElementById("create");
 const $canvasCancleButton = document.getElementById("cancle");
+const $newImage = document.getElementById("newImage");
+const $newImageImage = document.getElementById("newImageImage");
 let resizeWidth = 1200;
 let resizeHeight = 600;
 // export
@@ -95,6 +97,7 @@ function brushToolBarFunction() {
     }else if(id === "newProject") {
       $canvasResize.classList.remove("hidden");
       $popBackground.classList.remove("hidden");
+      $newImage.value = "";
       canDrawing = false;
     }else if(id === "exportProject") {
       $exportPage.classList.remove("hidden");
@@ -298,6 +301,20 @@ function resize() {
   $newHeight.addEventListener("input", resizePreview);
   $newWidth.addEventListener("input", resizePreview);
 
+  $newImage.addEventListener("input", e => {
+    let reader = new FileReader();
+    reader.onload = function(i) {
+        $newImageImage.setAttribute("src", i.target.result);
+    };
+    reader.readAsDataURL(e.target.files[0]);
+
+    $newImageImage.onload = function() {
+      $newHeight.value = $newImageImage.height;
+      $newWidth.value = $newImageImage.width;
+      resizePreview()
+    }
+  })
+
   $canvasCreateButton.addEventListener("click", e => {
     if(confirm("새로만들면 기존의 작업물은 사라집니다.")) {
       resizeWidth = Number($newWidth.value);
@@ -338,9 +355,13 @@ function resize() {
   
       $canvas.style.width = `${resizeWidth}px`;
       $canvas.style.height = `${resizeHeight}px`;
-  
-      ctx.fillStyle = "#fff";
-      ctx.fillRect(0, 0, $canvas.width, $canvas.height);
+
+      if($newImage.value === "") {
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, $canvas.width, $canvas.height);
+      }else {
+        ctx.drawImage($newImageImage, 0, 0, $canvas.width, $canvas.height, 0, 0, $canvas.width, $canvas.height);
+      }
       
       drawingUndoList = new Array();
       $undo.classList.remove("active");

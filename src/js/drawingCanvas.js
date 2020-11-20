@@ -137,7 +137,7 @@ function canvasFunction() {
         if(drawingStyle === "eraser") ctx.globalCompositeOperation = "source-over";
         ctx.filter = `blur(0px)`;
         ctx.clearRect(0, 0, $canvas.width, $canvas.height);
-        ctx.drawImage(loadDrawing, 0, 0, $canvas.width, $canvas.height, 0, 0, $canvas.width, $canvas.height);  
+        ctx.drawImage(loadDrawing, 0, 0, $canvas.width, $canvas.height, 0, 0, $canvas.width, $canvas.height);
         ctx.filter = `blur(${drawingBlur}px)`;
         if(drawingStyle === "eraser") ctx.globalCompositeOperation = "destination-out";
         ctx.beginPath();
