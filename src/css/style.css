@@ -45,8 +45,22 @@
     #paletteHistory{width: 120px; height: 360px; background: #ddd; margin: 0 40px 0; overflow-y: auto;}
     #paletteHistory::-webkit-scrollbar{display: none;}
     .colorHistory{width: 24px; height: 24px; border: 1px solid #fff; float: left; box-shadow: inset 0 0 2px 1px #bbb; cursor: pointer; box-sizing: border-box;}
-    #colorIcon{width: 70px; height: 70px; position: relative; cursor: pointer; margin: 20px 40px; float: right;}
-      #colorIcon>span{width: 10px; height: 16px; display: block; position: absolute; transform: translateX(-50%); transform-origin: 0 30px; left: 50%; top: 6px; pointer-events: none;}
+    #pipette{width: 42px; height: 42px; float: left; margin: 20px 0px 20px 40px; background: #aaa; cursor: pointer; position: relative;}
+    #pipette>span{width: 14px; height: 14px; float: left; pointer-events: none;}
+    #pipette>span:nth-of-type(1){background: #f00;}
+    #pipette>span:nth-of-type(2){background: #ff0;}
+      #pipette>span:nth-of-type(3){background: #0f0;}
+      #pipette>span:nth-of-type(4){background: #0ff;}
+      #pipette>span:nth-of-type(5){background: #00f; position: relative;}
+      #pipette>span:nth-of-type(5)::after{content: ""; display: block; width: 14px; height: 14px; position: absolute; border: 2px solid #888; left: -2px; top: -2px;}
+      #pipette>span:nth-of-type(6){background: #f0f;}
+      #pipette>span:nth-of-type(7){background: #f00;}
+      #pipette>span:nth-of-type(8){background: #ff0;}
+      #pipette>span:nth-of-type(9){background: #0f0;}
+      #pipette>span:nth-of-type(10){position: absolute; width: 44px; height: 44px; left: -1px; top: -1px;}
+      #pipette.active>span:nth-of-type(10){box-shadow: inset 0 0 2px 3px #aaa;}
+      #colorIcon{width: 50px; height: 50px; position: relative; cursor: pointer; margin: 20px 40px 20px 0; float: right;}
+      #colorIcon>span{width: 7px; height: 12px; display: block; position: absolute; transform: translateX(-50%); transform-origin: 0 20px; left: 50%; top: 5px; pointer-events: none;}
       #colorIcon>span:nth-of-type(1){background: #f00;}
       #colorIcon>span:nth-of-type(2){background: #ff0; transform: rotate(60deg) translateX(-50%);}
       #colorIcon>span:nth-of-type(3){background: #0f0; transform: rotate(120deg) translateX(-50%);}
@@ -103,7 +117,7 @@
     #addLayer{color: #fff; cursor: pointer; width: 120px; height: 20px; line-height: 18px; background: #666; text-align: center;}
     #addLayer:hover{color: #ddd; background: #555;}
     #layerList{width: 120px; height: 380px; display: flex; align-items: center; flex-direction: column-reverse; overflow-y: auto;}
-    .layerList{width: 120px; height: 40px; background: #999; border-top: 1px solid #666; text-align: center; color: #fff;}
+    .layerList{width: 120px; height: 40px; background: #999; border-top: 1px solid #666; text-align: center; color: #fff; user-select:  none;}
     .previewImageBackground{float: left; width: 60px; height: 40px; background: #555; position: relative;}
     .previewImage{max-width: 60px; max-height: 40px; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: none;}
     .layerList>.active{height: 20px; line-height: 19px; cursor: pointer;}

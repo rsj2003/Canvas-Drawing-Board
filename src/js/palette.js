@@ -1,6 +1,7 @@
 // roller palette
 const $paletteHistory = document.getElementById("paletteHistory");
 const $palette = document.getElementById("palette");
+const $pipette = document.getElementById("pipette");
 const hex = "0123456789abcdef".split("");
 let $colors;
 let colorNumber = [15,0,6];
@@ -13,6 +14,9 @@ let select = 0;
 let oldSelect = 0;
 let paletteDeg = 0;
 let movePaletteDeg = 0;
+let pipette = false;
+let pipetteColor;
+let pipetteData;
 
 function paletteFunction() {
   for(let i = 0; i < 16 * 6 + 7; i++) {
@@ -68,7 +72,7 @@ function paletteFunction() {
       movePaletteDeg = (select - 6) * 15;
     };
     if(hasClass(e.target, "colorHistory")) {
-      if(paletteHistory.length >= getIdx(e.target) - 1) {
+      if(paletteHistory.length - 1 >= getIdx(e.target)) {
         $color.value = paletteHistory[getIdx(e.target)];
         $colorInput.value = paletteHistory[getIdx(e.target)];
         brushPreview();
@@ -131,6 +135,12 @@ function paletteFunction() {
       }
     };
   });
+
+  $canvas.addEventListener("mousemove", e => {
+    canvasPipetteColor(e);
+  })
+
+  $canvas.addEventListener("click", canvasPipetteColorPick);
 
   document.addEventListener("mouseup", e => {
     mouseDown = false;
@@ -213,4 +223,45 @@ function paletteFunction() {
       paletteDeg = movePaletteDeg;
     };
   });
+
+  $pipette.addEventListener("click", e => {
+    $pipette.classList.toggle("active");
+    
+    if(hasClass($pipette, "active")) {
+      canDrawing = false;
+      pipette = true;
+      pipetteColor = $color.value;
+      pipetteData = ctx.getImageData(0, 0, $canvas.width, $canvas.height).data;
+    }else {
+      canDrawing = true;
+      pipette = false;
+      $color.value = pipetteColor;
+      $colorInput.value = pipetteColor;
+    }
+  })
 };
+
+function canvasPipetteColor(e) {
+  if(pipette) {
+    let r = pipetteData[(Math.round(e.offsetX / scale) + (Math.round(e.offsetY / scale) * $canvas.width)) * 4].toString(16).split(".")[0];
+    let g = pipetteData[(Math.round(e.offsetX / scale) + (Math.round(e.offsetY / scale) * $canvas.width)) * 4 + 1].toString(16).split(".")[0];
+    let b = pipetteData[(Math.round(e.offsetX / scale) + (Math.round(e.offsetY / scale) * $canvas.width)) * 4 + 2].toString(16).split(".")[0];
+    if(r.length === 1) r = "0" + r;
+    if(r.length === 3) r = "ff";
+    if(g.length === 1) g = "0" + g;
+    if(g.length === 3) g = "ff";
+    if(b.length === 1) b = "0" + b;
+    if(b.length === 3) b = "ff";
+    console.log(r, g, b);
+    $color.value = `#${r}${g}${b}`;
+    $colorInput.value = `#${r}${g}${b}`;
+  }
+}
+
+function canvasPipetteColorPick() {
+  if(pipette) {
+    $pipette.classList.remove("active");
+    canDrawing = true;
+    pipette = false;
+  }
+}

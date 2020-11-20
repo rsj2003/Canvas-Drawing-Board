@@ -519,6 +519,13 @@ function createRecordLayer(idx) {
       moveStartScrollY = $canvasPage.scrollTop;
     }
   })
+  canvas.addEventListener("mousedown", e => {
+    canvasZoomMove(e);
+  })
+  canvas.addEventListener("mousemove", e => {
+    canvasPipetteColor(e);
+  })
+  canvas.addEventListener("click", canvasPipetteColorPick);
   viewButton.addEventListener("click", e => {
     viewButtonClickEvent(e);
   })

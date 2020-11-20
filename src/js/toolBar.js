@@ -240,7 +240,6 @@ function mosaic() {
         mosaicData[mosaicBList[l]] = b;
         mosaicData[mosaicAList[l]] = a;
       }
-      console.log(idxY);
       idx += 4 * mosaicSize;
       if(idx / ($export.width * 4) >= idxY) {
         idx = idx - (idx % ($export.width * 4)) + ($export.width * 4 * (mosaicSize - 1));
@@ -349,6 +348,16 @@ function resize() {
       previewImageBackgroundList.forEach(i => i.addEventListener("click", e => {
         layerSelect(e.target.dataset.layer);
       }));
+
+      $canvas.addEventListener("mousedown", e => {
+        canvasZoomMove(e);
+      })
+      
+      $canvas.addEventListener("click", canvasPipetteColorPick);
+      
+      $canvas.addEventListener("mousemove", e => {
+        canvasPipetteColor(e);
+      })
 
       $canvas.width = resizeWidth;
       $canvas.height = resizeHeight;

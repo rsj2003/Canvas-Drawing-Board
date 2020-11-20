@@ -73,15 +73,7 @@ function pageMouseMove() {
 
 function pageMouseMoveEvent() {
   $canvas.addEventListener("mousedown", e => {
-    if(pressSpace) {
-      pageMoving = true;
-      $canvasPage.style.cursor = "grabbing";
-      $page.style.cursor = "grabbing";
-      moveStartX = e.pageX;
-      moveStartY = e.pageY;
-      moveStartScrollX = $canvasPage.scrollLeft;
-      moveStartScrollY = $canvasPage.scrollTop;
-    }
+    canvasZoomMove(e);
   })
   document.addEventListener("mousemove", e => {
     if(pageMoving) {
@@ -98,4 +90,16 @@ function pageMouseMoveEvent() {
       $page.style.cursor = "";
     }
   })
+}
+
+function canvasZoomMove(e) {
+  if(pressSpace) {
+    pageMoving = true;
+    $canvasPage.style.cursor = "grabbing";
+    $page.style.cursor = "grabbing";
+    moveStartX = e.pageX;
+    moveStartY = e.pageY;
+    moveStartScrollX = $canvasPage.scrollLeft;
+    moveStartScrollY = $canvasPage.scrollTop;
+  }
 }
