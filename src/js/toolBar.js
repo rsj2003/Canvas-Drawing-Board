@@ -111,12 +111,12 @@ function brushToolBarFunction() {
       $mosaicRange.value = 1;
       $mosaic.value = 1;
     }
+    if(id ==="floodFill") {
+      $brushFloodFillInput.classList.remove("hidden");
+    }else {
+      $brushFloodFillInput.classList.add("hidden");
+    }
     brushPreview();
-    // if(id ==="floodFill") {
-    //   $brushFloodFillInput.classList.remove("hidden");
-    // }else {
-    //   $brushFloodFillInput.classList.add("hidden");
-    // }
   }))
 
   $rangeInputs.forEach(i => i.addEventListener("input", e => {
@@ -212,27 +212,42 @@ function mosaic() {
       let mosaicGList = new Array();
       let mosaicBList = new Array();
       let mosaicAList = new Array();
+      let alphaNone = new Array();
       for(let x = 0; x < mosaicSize; x++) {
         if((idx + (x * 4)) / ($export.width * 4) < idxY) {
           for(let y = 0; y < mosaicSize; y++) {
             if((idx + ($export.width * 4 * y) < $export.width * $export.height * 4)) {
-              mosaicRList.push(idx + (x * 4) + ($export.width * 4 * y));
-              mosaicGList.push(idx + (x * 4) + ($export.width * 4 * y) + 1);
-              mosaicBList.push(idx + (x * 4) + ($export.width * 4 * y) + 2);
-              mosaicAList.push(idx + (x * 4) + ($export.width * 4 * y) + 3);
-              r += mosaicData[idx + (x * 4) + ($export.width * 4 * y)];
-              g += mosaicData[idx + (x * 4) + ($export.width * 4 * y) + 1];
-              b += mosaicData[idx + (x * 4) + ($export.width * 4 * y) + 2];
-              a += mosaicData[idx + (x * 4) + ($export.width * 4 * y) + 3];
+              if(mosaicData[idx + (x * 4) + ($export.width * 4 * y) + 3] === 0) {
+                alphaNone.push(idx + (x * 4) + ($export.width * 4 * y));
+              }else {
+                r += mosaicData[idx + (x * 4) + ($export.width * 4 * y)];
+                g += mosaicData[idx + (x * 4) + ($export.width * 4 * y) + 1];
+                b += mosaicData[idx + (x * 4) + ($export.width * 4 * y) + 2];
+                a += mosaicData[idx + (x * 4) + ($export.width * 4 * y) + 3];
+                mosaicRList.push(idx + (x * 4) + ($export.width * 4 * y));
+                mosaicGList.push(idx + (x * 4) + ($export.width * 4 * y) + 1);
+                mosaicBList.push(idx + (x * 4) + ($export.width * 4 * y) + 2);
+                mosaicAList.push(idx + (x * 4) + ($export.width * 4 * y) + 3);
+              }
             }
           }
         }
+      }
+      for(let l = 0; l < alphaNone.length; l++) {
+        r += Math.round(r / mosaicRList.length);
+        g += Math.round(g / mosaicGList.length);
+        b += Math.round(b / mosaicBList.length);
+        mosaicRList.push(alphaNone[l]);
+        mosaicGList.push(alphaNone[l] + 1);
+        mosaicBList.push(alphaNone[l] + 2);
+        mosaicAList.push(alphaNone[l] + 3);
       }
       // if(i > Math.ceil($export.width / mosaicSize) * Math.ceil($export.height / mosaicSize) - 5) console.log(mosaicRList);
       r = Math.round(r / mosaicRList.length);
       g = Math.round(g / mosaicGList.length);
       b = Math.round(b / mosaicBList.length);
       a = Math.round(a / mosaicAList.length);
+      // console.log(r, g, b, a);
       for(let l = 0; l < mosaicRList.length; l++) {
         // if(i > Math.ceil($export.width / mosaicSize) * Math.ceil($export.height / mosaicSize) - 5) console.log(mosaicRList[l]);
         mosaicData[mosaicRList[l]] = r;
