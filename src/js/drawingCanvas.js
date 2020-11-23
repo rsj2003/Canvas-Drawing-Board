@@ -415,7 +415,7 @@ function layerFunction() {
 function viewButtonClickEvent(e) {
   let layerList = e.target.closest(".layerList");
   let select = $canvas;
-  let selectSelectCanvas = selectCanvas;
+  let selectSelectCanvas = {element: selectCanvas.element, idx: selectCanvas.idx};
   layerList.classList.toggle("view");
   layerCanvasList.forEach(i => {
     if(i.dataset.layer === layerList.dataset.layer) {
@@ -446,7 +446,7 @@ function viewButtonClickEvent(e) {
   }
   $canvas = select;
   ctx = $canvas.getContext("2d");
-  selectCanvas = selectSelectCanvas;
+  selectCanvas = {element: selectSelectCanvas.element, idx: selectSelectCanvas.idx};
 }
 
 function deleteButtonClickEvent(e) {
@@ -543,17 +543,17 @@ function createRecordLayer(idx) {
   $layerList.append(layerList);
   
 
-  canvas.classList.add("layer");
-  canvas.dataset.layer = idx;
-
-  selectLayer.classList.remove("select");
-  selectLayer = layerList;
-
   $canvasPage.append(canvas);
   $canvas = canvas;
   ctx = $canvas.getContext("2d");
   selectCanvas.idx = idx;
   selectCanvas.element = previewImage;
+  
+  canvas.classList.add("layer");
+  canvas.dataset.layer = idx;
+
+  selectLayer.classList.remove("select");
+  selectLayer = layerList;
 
   previewImageBackgroundList = document.querySelectorAll(".previewImageBackground");
   canvasViewButtonList = document.querySelectorAll(".viewButton");
